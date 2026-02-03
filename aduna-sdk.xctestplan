@@ -1,0 +1,27 @@
+{
+  "configurations" : [
+    {
+      "id" : "3170E95B-1474-4164-BDAE-3CD9B66C5532",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "selectedTags" : {
+        "includeXCTests" : true
+      },
+      "target" : {
+        "containerPath" : "container:aduna-sdk.xcodeproj",
+        "identifier" : "EFEB9D582CD28A3300FBF71D",
+        "name" : "aduna-sdkTests"
+      }
+    }
+  ],
+  "version" : 1
+}

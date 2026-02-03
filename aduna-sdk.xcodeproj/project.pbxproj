@@ -1,0 +1,704 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8713E93C2E216B0C00D970A7 /* ReceivedJwtModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8713E93B2E216B0200D970A7 /* ReceivedJwtModel.swift */; };
+		8725F80A2E3A778B003436F7 /* JOSESwift in Frameworks */ = {isa = PBXBuildFile; platformFilter = ios; productRef = 8725F8092E3A778B003436F7 /* JOSESwift */; settings = {ATTRIBUTES = (Required, ); }; };
+		872B9BEE2E33BDF1006AD0EB /* ResponseJwtModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872B9BED2E33BDF1006AD0EB /* ResponseJwtModel.swift */; };
+		87C5D74E2E68AA9F004AFBAC /* certificates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C5D74D2E68AA90004AFBAC /* certificates.swift */; };
+		87C5D7502E69C0CC004AFBAC /* ErrorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C5D74F2E69C0C8004AFBAC /* ErrorModel.swift */; };
+		A9FBD00A2F2105C600F92800 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FBD0092F2105C100F92800 /* Logger.swift */; };
+		A9FBD00C2F21090500F92800 /* Jwt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FBD00B2F2108FC00F92800 /* Jwt.swift */; };
+		A9FBD00E2F2147B700F92800 /* PrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FBD00D2F2147A600F92800 /* PrivateKey.swift */; };
+		EF3427D32DAFF5AB00E80DE8 /* DocumentationSampleTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF3427D22DAFF5AB00E80DE8 /* DocumentationSampleTest.swift */; };
+		EF62D5F72CD521FF007D9CC1 /* CAACView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF62D5F62CD521FF007D9CC1 /* CAACView.swift */; };
+		EF62D5F92CD52814007D9CC1 /* CAACCSPOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF62D5F82CD52814007D9CC1 /* CAACCSPOptions.swift */; };
+		EF99C2C82CF9C1D100D64E80 /* ENVOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF99C2C72CF9C1D100D64E80 /* ENVOperation.swift */; };
+		EF99C2CA2CF9C20500D64E80 /* ENVCSPOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF99C2C92CF9C20500D64E80 /* ENVCSPOptions.swift */; };
+		EF99C2D02CF9C29200D64E80 /* CAACOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF99C2CF2CF9C29200D64E80 /* CAACOperation.swift */; };
+		EFEB9D5C2CD28A3300FBF71D /* aduna_sdkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEB9D5B2CD28A3300FBF71D /* aduna_sdkTests.swift */; };
+		EFEB9D5D2CD28A3300FBF71D /* aduna_sdk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EFEDBF422CD2598C00232A49 /* aduna_sdk.framework */; };
+		EFEDBF472CD2598C00232A49 /* aduna_sdk.docc in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF462CD2598C00232A49 /* aduna_sdk.docc */; };
+		EFEDBF532CD2598C00232A49 /* aduna_sdk.h in Headers */ = {isa = PBXBuildFile; fileRef = EFEDBF452CD2598C00232A49 /* aduna_sdk.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		EFEDBF6E2CD25AEB00232A49 /* ULinkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF5E2CD25AEB00232A49 /* ULinkModel.swift */; };
+		EFEDBF6F2CD25AEB00232A49 /* ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF602CD25AEB00232A49 /* ConsentView.swift */; };
+		EFEDBF702CD25AEB00232A49 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF612CD25AEB00232A49 /* ContentView.swift */; };
+		EFEDBF732CD25AEB00232A49 /* ENVAppearanceImages.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF662CD25AEB00232A49 /* ENVAppearanceImages.swift */; };
+		EFEDBF742CD25AEB00232A49 /* AppearanceText.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF672CD25AEB00232A49 /* AppearanceText.swift */; };
+		EFEDBF752CD25AEB00232A49 /* Completions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF682CD25AEB00232A49 /* Completions.swift */; };
+		EFEDBF762CD25AEB00232A49 /* MockSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF692CD25AEB00232A49 /* MockSDK.swift */; };
+		EFEDBF772CD25AEB00232A49 /* CAACAnalyticsDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF6A2CD25AEB00232A49 /* CAACAnalyticsDelegate.swift */; };
+		EFEDBF782CD25AEB00232A49 /* ENVAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF6B2CD25AEB00232A49 /* ENVAppearance.swift */; };
+		EFEDBF7A2CD25B2900232A49 /* CAACSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFEDBF792CD25B2900232A49 /* CAACSDK.swift */; };
+		EFEDBF7C2CD25B9000232A49 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFEDBF7B2CD25B9000232A49 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EFEB9D5E2CD28A3300FBF71D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EFEDBF392CD2598B00232A49 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EFEDBF412CD2598C00232A49;
+			remoteInfo = "caac-sdk";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		8713E93B2E216B0200D970A7 /* ReceivedJwtModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedJwtModel.swift; sourceTree = "<group>"; };
+		871BBB732F29290400F50239 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		871BBB752F2CFD0B00F50239 /* Aduna SDK Software License Agreement.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Aduna SDK Software License Agreement.pdf"; sourceTree = "<group>"; };
+		871BBB772F2D22E900F50239 /* RELEASES-pub.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "RELEASES-pub.md"; sourceTree = "<group>"; };
+		872B9BED2E33BDF1006AD0EB /* ResponseJwtModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseJwtModel.swift; sourceTree = "<group>"; };
+		872B9BF32E37CF89006AD0EB /* aduna-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "aduna-sdk.xcodeproj"; sourceTree = "<group>"; };
+		87C5D74D2E68AA90004AFBAC /* certificates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = certificates.swift; sourceTree = "<group>"; };
+		87C5D74F2E69C0C8004AFBAC /* ErrorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorModel.swift; sourceTree = "<group>"; };
+		A9FBD0092F2105C100F92800 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		A9FBD00B2F2108FC00F92800 /* Jwt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jwt.swift; sourceTree = "<group>"; };
+		A9FBD00D2F2147A600F92800 /* PrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivateKey.swift; sourceTree = "<group>"; };
+		EF3427D22DAFF5AB00E80DE8 /* DocumentationSampleTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentationSampleTest.swift; sourceTree = "<group>"; };
+		EF62D5F62CD521FF007D9CC1 /* CAACView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAACView.swift; sourceTree = "<group>"; };
+		EF62D5F82CD52814007D9CC1 /* CAACCSPOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAACCSPOptions.swift; sourceTree = "<group>"; };
+		EF6870422CD28BF0003F2284 /* aduna-sdk.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "aduna-sdk.xctestplan"; sourceTree = "<group>"; };
+		EF6870432CD29267003F2284 /* RELEASES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = RELEASES.md; sourceTree = "<group>"; };
+		EF6870452CD29415003F2284 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EF99C2C72CF9C1D100D64E80 /* ENVOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ENVOperation.swift; sourceTree = "<group>"; };
+		EF99C2C92CF9C20500D64E80 /* ENVCSPOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ENVCSPOptions.swift; sourceTree = "<group>"; };
+		EF99C2CF2CF9C29200D64E80 /* CAACOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAACOperation.swift; sourceTree = "<group>"; };
+		EFEB9D592CD28A3300FBF71D /* aduna-sdkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "aduna-sdkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFEB9D5B2CD28A3300FBF71D /* aduna_sdkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = aduna_sdkTests.swift; sourceTree = "<group>"; };
+		EFEDBF422CD2598C00232A49 /* aduna_sdk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = aduna_sdk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EFEDBF452CD2598C00232A49 /* aduna_sdk.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aduna_sdk.h; sourceTree = "<group>"; };
+		EFEDBF462CD2598C00232A49 /* aduna_sdk.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = aduna_sdk.docc; sourceTree = "<group>"; };
+		EFEDBF5E2CD25AEB00232A49 /* ULinkModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ULinkModel.swift; sourceTree = "<group>"; };
+		EFEDBF602CD25AEB00232A49 /* ConsentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsentView.swift; sourceTree = "<group>"; };
+		EFEDBF612CD25AEB00232A49 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		EFEDBF662CD25AEB00232A49 /* ENVAppearanceImages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ENVAppearanceImages.swift; sourceTree = "<group>"; };
+		EFEDBF672CD25AEB00232A49 /* AppearanceText.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppearanceText.swift; sourceTree = "<group>"; };
+		EFEDBF682CD25AEB00232A49 /* Completions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Completions.swift; sourceTree = "<group>"; };
+		EFEDBF692CD25AEB00232A49 /* MockSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MockSDK.swift; sourceTree = "<group>"; };
+		EFEDBF6A2CD25AEB00232A49 /* CAACAnalyticsDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CAACAnalyticsDelegate.swift; sourceTree = "<group>"; };
+		EFEDBF6B2CD25AEB00232A49 /* ENVAppearance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ENVAppearance.swift; sourceTree = "<group>"; };
+		EFEDBF792CD25B2900232A49 /* CAACSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAACSDK.swift; sourceTree = "<group>"; };
+		EFEDBF7B2CD25B9000232A49 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EFEB9D562CD28A3300FBF71D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFEB9D5D2CD28A3300FBF71D /* aduna_sdk.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFEDBF3F2CD2598C00232A49 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8725F80A2E3A778B003436F7 /* JOSESwift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8713E93E2E29301900D970A7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				872B9BF32E37CF89006AD0EB /* aduna-sdk.xcodeproj */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		87E12D902F1E677A00B1C991 /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EF461CEA2DB92702009EECBE /* eNV */ = {
+			isa = PBXGroup;
+			children = (
+				EFEDBF662CD25AEB00232A49 /* ENVAppearanceImages.swift */,
+				EFEDBF6B2CD25AEB00232A49 /* ENVAppearance.swift */,
+				EF99C2C72CF9C1D100D64E80 /* ENVOperation.swift */,
+				EF99C2C92CF9C20500D64E80 /* ENVCSPOptions.swift */,
+			);
+			path = eNV;
+			sourceTree = "<group>";
+		};
+		EFEB9D5A2CD28A3300FBF71D /* aduna-sdkTests */ = {
+			isa = PBXGroup;
+			children = (
+				EFEB9D5B2CD28A3300FBF71D /* aduna_sdkTests.swift */,
+				EF3427D22DAFF5AB00E80DE8 /* DocumentationSampleTest.swift */,
+			);
+			path = "aduna-sdkTests";
+			sourceTree = "<group>";
+		};
+		EFEDBF382CD2598B00232A49 = {
+			isa = PBXGroup;
+			children = (
+				871BBB752F2CFD0B00F50239 /* Aduna SDK Software License Agreement.pdf */,
+				871BBB732F29290400F50239 /* README.md */,
+				EF6870432CD29267003F2284 /* RELEASES.md */,
+				871BBB772F2D22E900F50239 /* RELEASES-pub.md */,
+				EF6870422CD28BF0003F2284 /* aduna-sdk.xctestplan */,
+				EFEDBF442CD2598C00232A49 /* aduna-sdk */,
+				EFEB9D5A2CD28A3300FBF71D /* aduna-sdkTests */,
+				8713E93E2E29301900D970A7 /* Frameworks */,
+				EFEDBF432CD2598C00232A49 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EFEDBF432CD2598C00232A49 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EFEDBF422CD2598C00232A49 /* aduna_sdk.framework */,
+				EFEB9D592CD28A3300FBF71D /* aduna-sdkTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EFEDBF442CD2598C00232A49 /* aduna-sdk */ = {
+			isa = PBXGroup;
+			children = (
+				A9FBD00D2F2147A600F92800 /* PrivateKey.swift */,
+				A9FBD00B2F2108FC00F92800 /* Jwt.swift */,
+				A9FBD0092F2105C100F92800 /* Logger.swift */,
+				EFEDBF452CD2598C00232A49 /* aduna_sdk.h */,
+				EFEDBF5F2CD25AEB00232A49 /* models */,
+				EFEDBF6C2CD25AEB00232A49 /* objects */,
+				EFEDBF792CD25B2900232A49 /* CAACSDK.swift */,
+				EF62D5F62CD521FF007D9CC1 /* CAACView.swift */,
+				EFEDBF622CD25AEB00232A49 /* sav2Views */,
+				EFEDBF7B2CD25B9000232A49 /* Assets.xcassets */,
+				EFEDBF462CD2598C00232A49 /* aduna_sdk.docc */,
+				EF6870452CD29415003F2284 /* Info.plist */,
+			);
+			path = "aduna-sdk";
+			sourceTree = "<group>";
+		};
+		EFEDBF5F2CD25AEB00232A49 /* models */ = {
+			isa = PBXGroup;
+			children = (
+				87C5D74F2E69C0C8004AFBAC /* ErrorModel.swift */,
+				87C5D74D2E68AA90004AFBAC /* certificates.swift */,
+				872B9BED2E33BDF1006AD0EB /* ResponseJwtModel.swift */,
+				EFEDBF5E2CD25AEB00232A49 /* ULinkModel.swift */,
+				8713E93B2E216B0200D970A7 /* ReceivedJwtModel.swift */,
+			);
+			path = models;
+			sourceTree = "<group>";
+		};
+		EFEDBF622CD25AEB00232A49 /* sav2Views */ = {
+			isa = PBXGroup;
+			children = (
+				EFEDBF602CD25AEB00232A49 /* ConsentView.swift */,
+				EFEDBF612CD25AEB00232A49 /* ContentView.swift */,
+			);
+			path = sav2Views;
+			sourceTree = "<group>";
+		};
+		EFEDBF6C2CD25AEB00232A49 /* objects */ = {
+			isa = PBXGroup;
+			children = (
+				EF461CEA2DB92702009EECBE /* eNV */,
+				EFEDBF672CD25AEB00232A49 /* AppearanceText.swift */,
+				EFEDBF682CD25AEB00232A49 /* Completions.swift */,
+				EFEDBF692CD25AEB00232A49 /* MockSDK.swift */,
+				EFEDBF6A2CD25AEB00232A49 /* CAACAnalyticsDelegate.swift */,
+				EF99C2CF2CF9C29200D64E80 /* CAACOperation.swift */,
+				EF62D5F82CD52814007D9CC1 /* CAACCSPOptions.swift */,
+			);
+			path = objects;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		EFEDBF3D2CD2598C00232A49 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFEDBF532CD2598C00232A49 /* aduna_sdk.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		EFEB9D582CD28A3300FBF71D /* aduna-sdkTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EFEB9D622CD28A3300FBF71D /* Build configuration list for PBXNativeTarget "aduna-sdkTests" */;
+			buildPhases = (
+				EFEB9D552CD28A3300FBF71D /* Sources */,
+				EFEB9D562CD28A3300FBF71D /* Frameworks */,
+				EFEB9D572CD28A3300FBF71D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EFEB9D5F2CD28A3300FBF71D /* PBXTargetDependency */,
+			);
+			name = "aduna-sdkTests";
+			productName = "caac-sdkTests";
+			productReference = EFEB9D592CD28A3300FBF71D /* aduna-sdkTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EFEDBF412CD2598C00232A49 /* aduna-sdk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EFEDBF562CD2598C00232A49 /* Build configuration list for PBXNativeTarget "aduna-sdk" */;
+			buildPhases = (
+				EFEDBF3D2CD2598C00232A49 /* Headers */,
+				EFEDBF3E2CD2598C00232A49 /* Sources */,
+				EFEDBF3F2CD2598C00232A49 /* Frameworks */,
+				EFEDBF402CD2598C00232A49 /* Resources */,
+				EFEDBF7D2CD25C7100232A49 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "aduna-sdk";
+			productName = "caac-sdk";
+			productReference = EFEDBF422CD2598C00232A49 /* aduna_sdk.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EFEDBF392CD2598B00232A49 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1530;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					EFEB9D582CD28A3300FBF71D = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					EFEDBF412CD2598C00232A49 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+				};
+			};
+			buildConfigurationList = EFEDBF3C2CD2598B00232A49 /* Build configuration list for PBXProject "aduna-sdk" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EFEDBF382CD2598B00232A49;
+			packageReferences = (
+				8725F8062E3A74C4003436F7 /* XCRemoteSwiftPackageReference "JOSESwift" */,
+			);
+			productRefGroup = EFEDBF432CD2598C00232A49 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 87E12D902F1E677A00B1C991 /* Products */;
+					ProjectRef = 872B9BF32E37CF89006AD0EB /* aduna-sdk.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				EFEDBF412CD2598C00232A49 /* aduna-sdk */,
+				EFEB9D582CD28A3300FBF71D /* aduna-sdkTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EFEB9D572CD28A3300FBF71D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFEDBF402CD2598C00232A49 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFEDBF7C2CD25B9000232A49 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		EFEDBF7D2CD25C7100232A49 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "FILE_NAME=$TARGET_BUILD_DIR/caac_sdk.framework/Headers/caac_sdk.h\n\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EFEB9D552CD28A3300FBF71D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFEB9D5C2CD28A3300FBF71D /* aduna_sdkTests.swift in Sources */,
+				EF3427D32DAFF5AB00E80DE8 /* DocumentationSampleTest.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFEDBF3E2CD2598C00232A49 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFEDBF772CD25AEB00232A49 /* CAACAnalyticsDelegate.swift in Sources */,
+				EFEDBF762CD25AEB00232A49 /* MockSDK.swift in Sources */,
+				EFEDBF752CD25AEB00232A49 /* Completions.swift in Sources */,
+				EF62D5F72CD521FF007D9CC1 /* CAACView.swift in Sources */,
+				A9FBD00A2F2105C600F92800 /* Logger.swift in Sources */,
+				EFEDBF6E2CD25AEB00232A49 /* ULinkModel.swift in Sources */,
+				EF62D5F92CD52814007D9CC1 /* CAACCSPOptions.swift in Sources */,
+				EFEDBF7A2CD25B2900232A49 /* CAACSDK.swift in Sources */,
+				EF99C2C82CF9C1D100D64E80 /* ENVOperation.swift in Sources */,
+				EFEDBF732CD25AEB00232A49 /* ENVAppearanceImages.swift in Sources */,
+				A9FBD00E2F2147B700F92800 /* PrivateKey.swift in Sources */,
+				EF99C2CA2CF9C20500D64E80 /* ENVCSPOptions.swift in Sources */,
+				EFEDBF702CD25AEB00232A49 /* ContentView.swift in Sources */,
+				87C5D7502E69C0CC004AFBAC /* ErrorModel.swift in Sources */,
+				87C5D74E2E68AA9F004AFBAC /* certificates.swift in Sources */,
+				EFEDBF782CD25AEB00232A49 /* ENVAppearance.swift in Sources */,
+				EFEDBF742CD25AEB00232A49 /* AppearanceText.swift in Sources */,
+				872B9BEE2E33BDF1006AD0EB /* ResponseJwtModel.swift in Sources */,
+				A9FBD00C2F21090500F92800 /* Jwt.swift in Sources */,
+				EFEDBF6F2CD25AEB00232A49 /* ConsentView.swift in Sources */,
+				EFEDBF472CD2598C00232A49 /* aduna_sdk.docc in Sources */,
+				EF99C2D02CF9C29200D64E80 /* CAACOperation.swift in Sources */,
+				8713E93C2E216B0C00D970A7 /* ReceivedJwtModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EFEB9D5F2CD28A3300FBF71D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EFEDBF412CD2598C00232A49 /* aduna-sdk */;
+			targetProxy = EFEB9D5E2CD28A3300FBF71D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EFEB9D602CD28A3300FBF71D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SD86WZJX69;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"TEST=1",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				MARKETING_VERSION = 0.8.7;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adunaglobal.caac.ios.csp.sdkTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EFEB9D612CD28A3300FBF71D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SD86WZJX69;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				MARKETING_VERSION = 0.8.7;
+				PRODUCT_BUNDLE_IDENTIFIER = com.adunaglobal.caac.ios.csp.sdkTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EFEDBF542CD2598C00232A49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		EFEDBF552CD2598C00232A49 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		EFEDBF572CD2598C00232A49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = SD86WZJX69;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.8.7;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				ONLY_ACTIVE_ARCH = YES;
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.adunaglobal.caac.ios.csp.sdk;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EFEDBF582CD2598C00232A49 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = SD86WZJX69;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.8.7;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				ONLY_ACTIVE_ARCH = YES;
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_BUNDLE_IDENTIFIER = com.adunaglobal.caac.ios.csp.sdk;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EFEB9D622CD28A3300FBF71D /* Build configuration list for PBXNativeTarget "aduna-sdkTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EFEB9D602CD28A3300FBF71D /* Debug */,
+				EFEB9D612CD28A3300FBF71D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EFEDBF3C2CD2598B00232A49 /* Build configuration list for PBXProject "aduna-sdk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EFEDBF542CD2598C00232A49 /* Debug */,
+				EFEDBF552CD2598C00232A49 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EFEDBF562CD2598C00232A49 /* Build configuration list for PBXNativeTarget "aduna-sdk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EFEDBF572CD2598C00232A49 /* Debug */,
+				EFEDBF582CD2598C00232A49 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8725F8062E3A74C4003436F7 /* XCRemoteSwiftPackageReference "JOSESwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airsidemobile/JOSESwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8725F8092E3A778B003436F7 /* JOSESwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8725F8062E3A74C4003436F7 /* XCRemoteSwiftPackageReference "JOSESwift" */;
+			productName = JOSESwift;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = EFEDBF392CD2598B00232A49 /* Project object */;
+}
