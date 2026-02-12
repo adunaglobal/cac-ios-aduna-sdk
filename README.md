@@ -5,7 +5,7 @@ Aduna's SDK fulfills the end-to-end flow of SIM-based Authentication. For this d
 
 ## Contents 
 1. [Features](#features) 
-2. [Requirements](#requirements) 
+2. [Development Requirements](#development-requirements) 
 3. [Compatibility](#compatibility) 
 4. [Installation](#installation) 
 5. [Quick Start](#quick-start) 
@@ -47,7 +47,7 @@ Aduna's SDK fulfills the end-to-end flow of SIM-based Authentication. For this d
 
 
 ## Compatibility 
-The SDK is designed to operate with Aduna release 3.8 ownwards which implements the supported NV2 APIs. 
+The SDK is designed to operate with Aduna release 3.8 onwards which implements the supported NV2 APIs. 
 
 
 ## Installation 
