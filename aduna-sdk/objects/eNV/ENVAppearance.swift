@@ -5,8 +5,6 @@
 //  ENVAppearance.swift
 //  sdk
 //
-//  Created by Kotronis Dimitrios on 23/11/23.
-//
 
 import Combine
 import Foundation

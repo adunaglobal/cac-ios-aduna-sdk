@@ -5,8 +5,6 @@
 //  ReceivedJwtModel.swift
 //  aduna-sdk
 //
-//  Created by Lilianna Georgouli on 11/7/25.
-//
 
 class ReceivedJwtModel: Codable {
     var app_info_jwt: String

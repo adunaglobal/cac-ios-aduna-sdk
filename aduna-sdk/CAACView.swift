@@ -5,8 +5,6 @@
 //  CAACView.swift
 //  aduna-sdk
 //
-//  Created by Kotronis Dimitrios on 1/11/24.
-//
 
 import Foundation
 

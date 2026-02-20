@@ -5,8 +5,6 @@
 //  certificates.swift
 //  aduna-sdk
 //
-//  Created by Lilianna Georgouli on 3/9/25.
-//
 
 import Foundation
 import CryptoKit

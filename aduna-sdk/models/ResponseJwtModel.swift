@@ -5,8 +5,6 @@
 //  ResponseJwtModel.swift
 //  aduna-sdk
 //
-//  Created by Lilianna Georgouli on 25/7/25.
-//
 
 struct ResponseJwtModel: Encodable {
     var `protocol`: String

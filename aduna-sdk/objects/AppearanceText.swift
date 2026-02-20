@@ -5,8 +5,6 @@
 //  AppearanceText.swift
 //  sdk
 //
-//  Created by Kotronis Dimitrios on 24/11/23.
-//
 
 import Foundation
 import SwiftUI

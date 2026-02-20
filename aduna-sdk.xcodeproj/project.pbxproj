@@ -49,9 +49,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8701BD182F462130003BF8AC /* Aduna SDK Source Available Software License Agreement.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Aduna SDK Source Available Software License Agreement.pdf"; sourceTree = "<group>"; };
 		8713E93B2E216B0200D970A7 /* ReceivedJwtModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedJwtModel.swift; sourceTree = "<group>"; };
 		871BBB732F29290400F50239 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		871BBB752F2CFD0B00F50239 /* Aduna SDK Software License Agreement.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Aduna SDK Software License Agreement.pdf"; sourceTree = "<group>"; };
 		871BBB772F2D22E900F50239 /* RELEASES-pub.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "RELEASES-pub.md"; sourceTree = "<group>"; };
 		872B9BED2E33BDF1006AD0EB /* ResponseJwtModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResponseJwtModel.swift; sourceTree = "<group>"; };
 		872B9BF32E37CF89006AD0EB /* aduna-sdk.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = "aduna-sdk.xcodeproj"; sourceTree = "<group>"; };
@@ -143,7 +143,7 @@
 		EFEDBF382CD2598B00232A49 = {
 			isa = PBXGroup;
 			children = (
-				871BBB752F2CFD0B00F50239 /* Aduna SDK Software License Agreement.pdf */,
+				8701BD182F462130003BF8AC /* Aduna SDK Source Available Software License Agreement.pdf */,
 				871BBB732F29290400F50239 /* README.md */,
 				EF6870432CD29267003F2284 /* RELEASES.md */,
 				871BBB772F2D22E900F50239 /* RELEASES-pub.md */,
@@ -418,7 +418,7 @@
 				);
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				MARKETING_VERSION = 0.8.7;
+				MARKETING_VERSION = 0.8.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.adunaglobal.caac.ios.csp.sdkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -436,7 +436,7 @@
 				DEVELOPMENT_TEAM = SD86WZJX69;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
-				MARKETING_VERSION = 0.8.7;
+				MARKETING_VERSION = 0.8.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.adunaglobal.caac.ios.csp.sdkTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -597,7 +597,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.7;
+				MARKETING_VERSION = 0.8.9;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
 				ONLY_ACTIVE_ARCH = YES;
@@ -634,7 +634,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.8.7;
+				MARKETING_VERSION = 0.8.9;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
 				ONLY_ACTIVE_ARCH = YES;

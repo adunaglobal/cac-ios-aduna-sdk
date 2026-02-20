@@ -5,8 +5,6 @@
 //  ErrorModel.swift
 //  aduna-sdk
 //
-//  Created by Lilianna Georgouli on 4/9/25.
-//
 
 enum FlowErrorCode: String {
     case user_activity

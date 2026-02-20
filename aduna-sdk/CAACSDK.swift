@@ -5,9 +5,6 @@
 //  ENVSDK.swift
 //  sdk
 //
-//  Created by Dimitris Kotronis on 16/10/23.
-//  Modified by Lilianna Georgouli on 24/1/24.
-//
 
 import CoreTelephony
 import Combine
@@ -316,26 +313,48 @@ public class CAACSDK: NSObject {
         }
     }
     
+    // Delegate method called when the entitlement server returns a token
+    public func subscriberTokenRefreshed(_ subscriber: CTSubscriber) {
+        if let refreshedToken = subscriber.carrierToken {
+            self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token refreshed:": "true"])
+            SDKLogger.debug("Successfully refreshed carrier token: \(refreshedToken.base64EncodedString())")
+        }
+        else {
+            self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token": "not refreshed"])
+            SDKLogger.debug("Carrier token not refreshed")
+        }
+    }
     
     func getCarrierToken (completion: (([String]?) -> Void)?) {
         DispatchQueue.global().asyncAfter(deadline: .now() + constDelayInSec) {
             var tokens: [String]? = []
             if self.useFixedCarrierToken {
-                tokens?.append("AKJ2YXxpUYtOpsNdJdYmrxSdGABNKVReNV1XRab+FaM1ghKiSXvOYt2YpfqovvZXC+Cf4CcduB/kjILqiBeEyPko7vDazje7LKzrVSTo+oaB+M+lZs3Wu6ElW99ZfZnBfR2LYZZEE1970MaTAphREPq0wifSi3sGQjz/7EVl0iW8RyO2xQCiN1brUhsYRUGZMfymoHXP1ffIqTYDR72t3lsb+kTA9h7jTOObUS25qyZYjQl3Tlmcw5CL6T9BTm8ULFHlyJGengKI1iFaOkaugEkMIej0CH5Yyfgp1ZKh8A5xvhpFRJhAm9gfZS2MZApfaQckOt+Zz0JLDP6rXyOWzDBYSdIefzlB+uTvqBL9RB0W2EGD+vUcQm1SV9fScdcfLg==")
+                tokens?.append("insert_here_your_testing_carrier_token")
                 completion?(tokens)
-                
             }
             else {
                 var numOfSim: Int = 0
                 CTSubscriberInfo.subscribers().forEach{ sub in
-                    if sub.isSIMInserted,
-                       let tokenTmp = sub.carrierToken?.base64EncodedString() {
+                    if let tokenTmp = sub.carrierToken?.base64EncodedString() {
+                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["token":"found"])
                         SDKLogger.debug("A SIM matching your app’s carrier descriptors is present.")
                         numOfSim += 1
                         tokens?.append(tokenTmp)
                         
                     } else {
+                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["token":"not found"])
                         SDKLogger.debug("No SIM matching your app’s carrier descriptors is present.")
+                        SDKLogger.debug("Requesting new token...")
+                        let isTokenRefreshed = sub.refreshCarrierToken()
+                        if  isTokenRefreshed,
+                            let refreshedToken = sub.carrierToken?.base64EncodedString() {
+                                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token":"refreshed"])
+                                numOfSim += 1
+                                tokens?.append(refreshedToken)
+                        }
+                        else {
+                            self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token": "not refreshed"])
+                        }
                     }
                 }
 

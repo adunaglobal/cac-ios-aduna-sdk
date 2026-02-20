@@ -5,8 +5,6 @@
 //  CAACOperation.swift
 //  aduna-sdk
 //
-//  Created by Kotronis Dimitrios on 29/11/24.
-//
 
 import Foundation
 

@@ -5,9 +5,6 @@
 //  ULinkModel.swift
 //  sdk
 //
-//  Created by Dimitris Kotronis on 16/10/23.
-//  Modified by Lilianna Georgouli on 24/1/24.
-//
 
 class ULinkModel: NSObject {
     var payload:  [String : Any]?

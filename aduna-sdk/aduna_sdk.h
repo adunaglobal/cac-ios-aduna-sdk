@@ -5,8 +5,6 @@
 //  aduna_sdk.h
 //  aduna-sdk
 //
-//  Created by Kotronis Dimitrios on 30/10/24.
-//
 
 #import <Foundation/Foundation.h>
 

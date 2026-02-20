@@ -5,8 +5,6 @@
 //  aduna_sdkTests.swift
 //  aduna-sdkTests
 //
-//  Created by Kotronis Dimitrios on 30/10/24.
-//
 
 import XCTest
 @testable import aduna_sdk

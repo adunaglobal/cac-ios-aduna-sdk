@@ -5,8 +5,6 @@
 //  ENVAnalyticsCallbacks.swift
 //  sdk
 //
-//  Created by Kotronis Dimitrios on 17/7/24.
-//
 
 import Foundation
 
@@ -45,7 +43,9 @@ public enum CAACAnalyticsEvent: String {
     case envInvocationUrlError = "ENV_Invocation_Url_Error"
     /// ENV operation failed.
     case envCspAppError = "ENV_Csp_App_Error"
-    
+    /// Events relevant to Carrier Token
+    case envCarrierToken = "ENV_Carrier_Token_Event"
+
 }
 
 

@@ -6,8 +6,6 @@
 //  PrivateKey.swift
 //  aduna-sdk
 //
-//  Created by Dimitrios Kotronis on 21/1/26.
-//
 
 func loadOrCreatePrivateKey(requireUserPresence: Bool = false) throws -> SecKey {
     enum SDKKeyIds {

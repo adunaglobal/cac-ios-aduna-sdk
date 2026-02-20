@@ -5,8 +5,6 @@
 //  Logger.swift
 //  aduna-sdk
 //
-//  Created by Dimitrios Kotronis on 21/1/26.
-//
 
 import OSLog
 

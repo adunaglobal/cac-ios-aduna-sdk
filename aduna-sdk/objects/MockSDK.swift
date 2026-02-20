@@ -5,8 +5,6 @@
 //  MockSDK.swift
 //  sdk
 //
-//  Created by Kotronis Dimitrios on 4/4/24.
-//
 
 import Foundation
 

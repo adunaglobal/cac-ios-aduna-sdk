@@ -5,9 +5,6 @@
 //  ContentView.swift
 //  sdk
 //
-//  Created by Kotronis Dimitrios on 23/11/23.
-//  Modified by Lilianna Georgouli on 26/03/2024
-//
 
 import SwiftUI
 import OSLog

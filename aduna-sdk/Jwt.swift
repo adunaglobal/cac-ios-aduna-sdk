@@ -5,8 +5,6 @@
 //  Jwt.swift
 //  aduna-sdk
 //
-//  Created by Dimitrios Kotronis on 21/1/26.
-//
 internal import JOSESwift
 import CryptoKit
 
