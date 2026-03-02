@@ -20,20 +20,35 @@ import SwiftUI
  ```
  */
 
-public class CAACSDK: NSObject {
+enum DefaultKeys {
+    static let RCTTimerKey = "RCTTimerKey"
+}
+
+public class CAACSDK: NSObject, CTSubscriberDelegate {
     
+    private var RCTTimer: Double {
+        get {
+            UserDefaults.standard.double(forKey: DefaultKeys.RCTTimerKey)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: DefaultKeys.RCTTimerKey)
+        }
+    }
+
     var useFixedCarrierToken: Bool
     var caacAnalyticsDelegate: CAACAnalyticsDelegate?
     var expInSeconds: Int?
     let constDelayInSec: Double = 0
+    var rCTThreshold: Double
     
     var uLinkModel:ULinkModel?
     var receivedJwt:ReceivedJwtModel?
 
-    init(useFixedCarrierToken: Bool = false, caacAnalyticsDelegate: CAACAnalyticsDelegate? = nil, expInSeconds: Int? = 120) {
+    init(useFixedCarrierToken: Bool = false, caacAnalyticsDelegate: CAACAnalyticsDelegate? = nil, expInSeconds: Int? = 120, rCTThreshold: Double? = 600) {
         self.useFixedCarrierToken = useFixedCarrierToken
         self.caacAnalyticsDelegate = caacAnalyticsDelegate
         self.expInSeconds = expInSeconds
+        self.rCTThreshold = rCTThreshold ?? 600
     }
     
     /**
@@ -60,9 +75,9 @@ public class CAACSDK: NSObject {
                            eNVCSPOptions: ENVCSPOptions,
                            caacAnalyticsDelegate: CAACAnalyticsDelegate?
     ) -> ENVOperation? {
-        let caacSDK = CAACSDK(useFixedCarrierToken: eNVCSPOptions.useFixedCarrierToken, caacAnalyticsDelegate: caacAnalyticsDelegate, expInSeconds: eNVCSPOptions.expInSeconds)
+        let caacSDK = CAACSDK(useFixedCarrierToken: eNVCSPOptions.useFixedCarrierToken, caacAnalyticsDelegate: caacAnalyticsDelegate, expInSeconds: eNVCSPOptions.expInSeconds, rCTThreshold: eNVCSPOptions.rCTThreshold)
        
-        let receivedModel = caacSDK.parseUrl(url: invocationUrl)
+        let receivedModel = caacSDK.parseUrl(invUrl: invocationUrl)
         caacSDK.uLinkModel = receivedModel
         if receivedModel != nil {
             return ENVOperation(sdk: caacSDK, eNVCSPOptions: eNVCSPOptions)
@@ -313,79 +328,203 @@ public class CAACSDK: NSObject {
         }
     }
     
+    
+    private var pendingSubscribers = Set<ObjectIdentifier>()
+    private var refreshedTokens: [String] = []
+    private var completion: (([String]) -> Void)?
+    private var timeoutWorkItem: DispatchWorkItem?
+    private var activeSubscribers: [CTSubscriber] = []
+    private let stateQ = DispatchQueue(label: "carrierToken.state")
+
     // Delegate method called when the entitlement server returns a token
     public func subscriberTokenRefreshed(_ subscriber: CTSubscriber) {
-        if let refreshedToken = subscriber.carrierToken {
-            self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token refreshed:": "true"])
-            SDKLogger.debug("Successfully refreshed carrier token: \(refreshedToken.base64EncodedString())")
+        stateQ.async {
+            let id = ObjectIdentifier(subscriber)
+            // Ignore callbacks we are not waiting for
+            guard self.pendingSubscribers.contains(id) else { return }
+            guard self.completion != nil else { return }
+            
+            if let refreshedToken = subscriber.carrierToken?.base64EncodedString(){
+                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token refreshed for \(subscriber.identifier):": true])
+                self.refreshedTokens.append(refreshedToken)
+                
+                // print part of refreshed carrier token
+                var printedRefreshedToken = "nil"
+                if (refreshedToken.count > 13) {
+                    let firstPart = refreshedToken.prefix(6)
+                    let lastPart = refreshedToken.suffix(7)
+                    printedRefreshedToken = "\(firstPart)...\(lastPart)"
+                }
+                SDKLogger.debug("Refreshed token: \(printedRefreshedToken)")
+                
+            }
+            else {
+                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token refreshed for \(subscriber.identifier):": false])
+                SDKLogger.debug("Token refresh callback received, but token is nil.")
+            }
+            
+            self.pendingSubscribers.remove(id)
+            
+            // If all subscribers completed, finish and cancel timeout
+            if self.pendingSubscribers.isEmpty {
+                self.finalizeAndCallback()
+            }
         }
-        else {
-            self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token": "not refreshed"])
-            SDKLogger.debug("Carrier token not refreshed")
-        }
+        
     }
     
     func getCarrierToken (completion: (([String]?) -> Void)?) {
-        DispatchQueue.global().asyncAfter(deadline: .now() + constDelayInSec) {
-            var tokens: [String]? = []
+        stateQ.async {
             if self.useFixedCarrierToken {
+                var tokens: [String]? = []
+                SDKLogger.debug("Fixed carrier token is used")
                 tokens?.append("insert_here_your_testing_carrier_token")
                 completion?(tokens)
             }
             else {
-                var numOfSim: Int = 0
-                CTSubscriberInfo.subscribers().forEach{ sub in
-                    if let tokenTmp = sub.carrierToken?.base64EncodedString() {
-                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["token":"found"])
-                        SDKLogger.debug("A SIM matching your app’s carrier descriptors is present.")
-                        numOfSim += 1
-                        tokens?.append(tokenTmp)
+                self.timeoutWorkItem?.cancel()
+                self.timeoutWorkItem = nil
+                self.pendingSubscribers.removeAll()
+                self.refreshedTokens.removeAll()
+                self.activeSubscribers.removeAll()
+                self.completion = completion
+                                
+                let subscribers = Array(CTSubscriberInfo.subscribers())
+                self.activeSubscribers = subscribers
+                
+                if subscribers.isEmpty {
+                    SDKLogger.debug("Empty array of subscribers-SIMs")
+                    self.finalizeAndCallback()
+                    return
+                }
+                
+                let now = Date().timeIntervalSince1970
+                SDKLogger.debug("Refresh Carrier Token Timer \(self.RCTTimer)")
+                if self.RCTTimer > 0 {
+                    let elapsed = now - self.RCTTimer
+                    SDKLogger.debug("Threshold for Refresh Carrier Token (in seconds) \(self.rCTThreshold)")
+                    if elapsed >= self.rCTThreshold { //if threshold passed, refresh carrier token
+                        SDKLogger.debug("Time elapsed since last refresh of carrier token (seconds): \(elapsed)\nThreshold passed-Refresh carrier token")
+                        self.refreshCarrierToken(now: now, subscribers: subscribers)
+                    } else { // threshold not passed - use the existing carrier token
+                        SDKLogger.debug("Time elapsed since last refresh of carrier token (seconds): \(elapsed)\nThreshold not passed-Fetch existing carrier token")
+                        var currentTokens: [String]? = []
+                        for subscriber in subscribers {
+                            if let currentToken = subscriber.carrierToken?.base64EncodedString() {
+                                currentTokens?.append(currentToken)
                         
-                    } else {
-                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["token":"not found"])
-                        SDKLogger.debug("No SIM matching your app’s carrier descriptors is present.")
-                        SDKLogger.debug("Requesting new token...")
-                        let isTokenRefreshed = sub.refreshCarrierToken()
-                        if  isTokenRefreshed,
-                            let refreshedToken = sub.carrierToken?.base64EncodedString() {
-                                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token":"refreshed"])
-                                numOfSim += 1
-                                tokens?.append(refreshedToken)
+                                // print part of existing carrier token
+                                var printedExistingToken = "nil"
+                                if (currentToken.count > 13) {
+                                    let firstPart = currentToken.prefix(6)
+                                    let lastPart = currentToken.suffix(7)
+                                    printedExistingToken = "\(firstPart)...\(lastPart)"
+                                }
+                                SDKLogger.debug("Existing token is: \(printedExistingToken)")
+                                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Fetching of existing carrier token for subscriber \(subscriber.identifier)":true])
+                            }
+                            else {
+                                SDKLogger.debug("No token for \(subscriber.identifier)")
+                            }
+                            
+                        }
+                        if currentTokens == [] {
+                            SDKLogger.debug("No existing token found - Refresh triggered")
+                            self.refreshCarrierToken(now: now, subscribers: subscribers)
                         }
                         else {
-                            self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token": "not refreshed"])
+                            completion?(currentTokens)
                         }
                     }
                 }
-
-                DispatchQueue.main.async {
-                    switch numOfSim {
-                    case 0:
-                        SDKLogger.error("No valid SIMs were found")
-                        completion?(nil)
-                    case 1:
-                        completion?(tokens)
-                    default: // numOfSim > 1 do not suppport Dual SIM mode
-                        if let mainToken = tokens?.first {
-                            tokens = [mainToken]
-                        }
-                        else if let secondToken = tokens?.last {
-                            tokens = [secondToken]
-                        }
-                        else {
-                            tokens = nil
-                        }
-                        completion?(tokens)
-                    }
-                    
+                else { // no carrier token fetched yet
+                    SDKLogger.debug("First attempt to refresh carrier token: true")
+                    self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["First attempt to refresh carrier token": true])
+                    self.refreshCarrierToken(now: now, subscribers: subscribers)
                 }
+                
             }
         }
     }
     
+    private func refreshCarrierToken(now: TimeInterval, subscribers: [CTSubscriber]) {
+        for subscriber in subscribers {
+            subscriber.delegate = self
+            if subscriber.refreshCarrierToken() {
+                self.pendingSubscribers.insert(ObjectIdentifier(subscriber))
+                SDKLogger.debug("refreshCarrierToken() is triggered for subscriber \(subscriber.identifier)")
+                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Triggering of refreshCarrierToken() for subscriber \(subscriber.identifier)":true])
+            } else {
+                SDKLogger.debug("refreshCarrierToken() not accepted for subscriber \(subscriber.identifier).")
+                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Triggering of refreshCarrierToken() for subscriber \(subscriber.identifier)":false])
+            }
+        }
+        
+        // If no refreshes accepted, finish immediately
+        if self.pendingSubscribers.isEmpty {
+            SDKLogger.debug("Pending subscribers array: empty")
+            self.finalizeAndCallback()
+            return
+        }
+        
+        self.RCTTimer = now
+        
+        // Timeout: return whatever is collected after some seconds
+        let wi = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.stateQ.async {
+                if self.completion != nil {
+                    SDKLogger.debug("Refreshed tokens at timeout: \(self.refreshedTokens)")
+                    for subscriber in subscribers {
+                        let currentToken = subscriber.carrierToken?.base64EncodedString() ?? "nil"
+                        if currentToken != "nil" {
+                            self.refreshedTokens.append(currentToken)
+                        }
+                    }
+                    self.finalizeAndCallback()
+                } else {
+                    self.finalizeAndCallback()
+                    return
+                }
+            }
+        }
+        self.timeoutWorkItem = wi
+        DispatchQueue.global().asyncAfter(deadline: .now() + 6, execute: wi)
+
+    }
+    
+    private func finalizeAndCallback() {
+        let finalTokens = self.refreshedTokens
+        let callback = self.completion
+        
+        // Clean up everything to prevent memory leaks or ghost callbacks
+        self.timeoutWorkItem?.cancel()
+        self.timeoutWorkItem = nil
+        self.activeSubscribers.removeAll()
+        self.pendingSubscribers.removeAll()
+        self.completion = nil
+        
+        callback?(finalTokens)
+    }
+    
     // Function to parse url for NV2.0 
-    private func parseUrl(url: URL) -> ULinkModel? {
-        SDKLogger.debug("This is the invocation url: \(url)")
+    private func parseUrl(invUrl: URL) -> ULinkModel? {
+        SDKLogger.debug("This is the invocation url: \(invUrl)")
+        
+        var urlString = invUrl.absoluteString
+        if let range = urlString.range(of: "#") {
+            urlString.replaceSubrange(range, with: "?")
+        }
+
+        guard let url = URL(string: urlString)
+        else {
+            let errorDescription = FlowErrorDescription.GENERIC_ERROR.rawValue
+            caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": "invocation_url_error", "error_description": errorDescription])
+            SDKLogger.error("Error in the invocation url")
+            return nil
+        }
+        
+        SDKLogger.debug("This is the invocation url after:\(String(describing: url))")
         let validScopes = ["dpv:FraudPreventionAndDetection#number-verification-verify-read",
                            "dpv:FraudPreventionAndDetection#number-verification:verify",
                            "dpv:FraudPreventionAndDetection#number-verification:device-phone-number:read",

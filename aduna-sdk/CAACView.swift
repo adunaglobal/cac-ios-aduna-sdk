@@ -65,7 +65,8 @@ public struct CAACView: View {
            useFixedCarrierToken: true,
            skipConsentScreen: false,
            envAppearance: appearance,
-           expInSeconds: 100
+           expInSeconds: 100,
+           rCTThreshold: 600
        )
   
     let previewSdk: CAACSDK = {

@@ -37,7 +37,8 @@ struct SampleView: View {
             .addENVOptions(useFixedCarrierToken: false,
                            skipConsentScreen: false,
                            envAppearance: ENVAppearance(),
-                           expInSeconds: 120)
+                           expInSeconds: 120,
+                           rCTThreshold = 600)
             .build()
         
         if let invocationUrl = invocationUrl,

@@ -33,7 +33,8 @@ final class aduna_sdkTests: XCTestCase {
             .addENVOptions(useFixedCarrierToken: true,
                            skipConsentScreen: false,
                            envAppearance: ENVAppearance(),
-                           expInSeconds: 120
+                           expInSeconds: 120,
+                           rCTThreshold: 600
             )
             .build()
         

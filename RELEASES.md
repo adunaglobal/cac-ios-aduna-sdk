@@ -1,6 +1,12 @@
 # Aduna-sdk
 
 ## Release Notes
+
+### 0.8.10
+#### Other
+- Solution optimization
+- Bug fixing
+
 ### 0.8.9
 #### Other
 - Editorial updates

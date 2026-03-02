@@ -11,12 +11,14 @@ class ENVCSPOptions {
     let skipConsentScreen: Bool
     let envAppearance: ENVAppearance
     let expInSeconds: Int
+    let rCTThreshold: Double
     
-    init(useFixedCarrierToken:Bool, skipConsentScreen: Bool, envAppearance: ENVAppearance, expInSeconds: Int) {
+    init(useFixedCarrierToken:Bool, skipConsentScreen: Bool, envAppearance: ENVAppearance, expInSeconds: Int, rCTThreshold: Double) {
         self.useFixedCarrierToken = useFixedCarrierToken
         self.skipConsentScreen = skipConsentScreen
         self.envAppearance = envAppearance
         self.expInSeconds = expInSeconds
+        self.rCTThreshold = rCTThreshold
     }
     
 }

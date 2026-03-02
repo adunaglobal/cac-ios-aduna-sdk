@@ -28,17 +28,20 @@ public class CAACCSPOptions{
             - skipConsentScreen: If true consent screen is displayed, otherwise proceed directly to the loading screen.
             - envAppearance: set the ``ENVAppearance`` object that custiomizes the UI.
             - expInSeconds: Expiry in seconds of the NV2 information.
+            - rCTThreshold: Refresh Carrier Token Threshold - After the threshold, carrier token has to be refreshed.
          */
         public func addENVOptions(
             useFixedCarrierToken:Bool,
             skipConsentScreen:Bool,
             envAppearance: ENVAppearance,
-            expInSeconds: Int
+            expInSeconds: Int,
+            rCTThreshold: Double
         ) -> Builder {
             caacOptions.eNVCSPOptions = ENVCSPOptions(useFixedCarrierToken: useFixedCarrierToken,
                                                       skipConsentScreen: skipConsentScreen,
                                                       envAppearance: envAppearance,
-                                                      expInSeconds: expInSeconds
+                                                      expInSeconds: expInSeconds,
+                                                      rCTThreshold: rCTThreshold
             )
             return self
         }

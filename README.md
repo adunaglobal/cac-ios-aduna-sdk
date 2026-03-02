@@ -74,7 +74,8 @@ let cspOptions = CAACCSPOptions.Builder()
 .addENVOptions(useFixedCarrierToken: false, 
     skipConsentScreen: false, 
     envAppearance: ENVAppearance(), 
-    expInSeconds: 120) 
+    expInSeconds: 120,
+    rCTThreshold: 600) 
 .build() 
 
 let appearance = ENVAppearance() 
