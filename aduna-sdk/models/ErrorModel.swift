@@ -31,6 +31,7 @@ enum FlowErrorDescription: String {
     // jwt errors (both creation and decoding)
     case APP_INFO_MANDATORY_DATA_ARE_MISSING
     case CANNOT_SIGN_JWT
+    case CERTIFICATE_EXTRACTION_FAILED
     case CERTIFICATE_ISSUER_MISMATCH
     case EMPTY_APP_INFO_AND_HASH
     case ERROR_IN_CERTIFICATE_CHAIN

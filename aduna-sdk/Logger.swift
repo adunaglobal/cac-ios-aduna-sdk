@@ -23,7 +23,7 @@ enum SDKLogger {
     static let logger = Logger(subsystem: "com.adunaglobal.caac.ios.csp.sdk", category: "ENVSDK")
 
     static var level: SDKLogLevel = {
-        return .none      // SET HERE THE LOG LEVEL: .none, .error, .debug
+        return .debug      // SET HERE THE LOG LEVEL: .none, .error, .debug
     }()
 
     static func debug(_ message: String) {

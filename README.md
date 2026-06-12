@@ -29,6 +29,7 @@ Aduna's SDK fulfills the end-to-end flow of SIM-based Authentication. For this d
 - Returns encrypted carrier token to ASP app 
 - Customizable Swift-UI based view according to carrier app needs 
 - Supports configurable settings covering testing and production activities, appearance,and more. Configurable behavior via CAACSPOptions 
+- Supports Dual SIM
 - SDK is localization-ready and supports all iOS localization mechanisms; language resources are not included and must be provided by the integrating application
 - Logging and Analytics capabilities 
 
@@ -41,13 +42,21 @@ Aduna's SDK fulfills the end-to-end flow of SIM-based Authentication. For this d
  
 ## Setup Requirements 
 - Apple carrier entitlements for the Carrier app, which allow the SDK to retrieve the carrier token
-- Carrier handover HTML page, which must be opened in the Safari browser
-- AASA file including the appropriate paths for invoking the Carrier app or App Clip
-- Recommendation: add an App Clip to the Carrier app and include the SDK in the App Clip target
+- Add an App Clip to the Carrier app and include the SDK in the App Clip target
+- AASA file including the appropriate paths for invoking the Carrier app or App Clip (depending on the selected App clip experience)
+- Carrier handover HTML page, which must be opened in the Safari browser (depending on the selected App clip experience)
 
 
 ## Compatibility 
-The SDK is designed to operate with Aduna release 3.8 onwards which implements the supported NV2 APIs. 
+This SDK version is compatible with the following Aduna and Camara API releases.
+
+| API                 | Release/Version | Reference                                                                                                                    |
+|---------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------|
+| **Aduna APIs**      |
+| Authorization APIs  | v1.4.0          | 
+|                     |                 |                                                                                                                              |
+| **Camara APIs**     |
+| Number-verification | r3.2 / v2.1     | [Camara GitHub](https://github.com/camaraproject/NumberVerification/blob/r3.2/code/API_definitions/number-verification.yaml) |
 
 
 ## Installation 
@@ -71,7 +80,8 @@ Through `CAACCSPOptions.Builder()`, `CAACCSPOptions` can be initiated to provide
 
 ```swift
 let cspOptions = CAACCSPOptions.Builder() 
-.addENVOptions(useFixedCarrierToken: false, 
+.addENVOptions(useFixedCarrierToken: false,
+    useSecondFixedCarrierToken: false,
     skipConsentScreen: false, 
     envAppearance: ENVAppearance(), 
     expInSeconds: 120,
@@ -100,14 +110,14 @@ let cspOptions = CAACCSPOptions.Builder()
 
  
 ### Handling Invocation URLs 
-The `CAACSDK` provides a static function `getOperationFromUrl(invocationUrl: URL, cspOptions: CAACCSPOptions)` that may return a `CAACOperation` depending whether it corresponds to any NV or another operation. 
+The `CAACSDK` provides a static async function `getOperationFromUrl(invocationUrl: URL, cspOptions: CAACCSPOptions)` that may return a `CAACOperation` depending whether it corresponds to any NV or another operation. 
 
 ```swift 
 ... 
 (view) 
 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb){ userActivity in 
   if let invocationUrl = userActivity.webpageURL, 
-     let operation = CAACSDK.getOperationFromUrl( 
+     let operation = await CAACSDK.getOperationFromUrl( 
         invocationUrl: invocationUrl, 
         cspOptions: cspOptions 
     ) { 
@@ -170,11 +180,18 @@ The generated XCFramework will be available at:
 You can copy the output file into your CSP app project. 
 
 ### Input Url 
-**NV 2.0 URL format**
+**NV 2.1 URL format**
 
+Default app clip experience:
+```text
+https://appclip.apple.com/id?p=com.<carrier-app-bundle>&app_info_jwt=<signed by the aggregator and includes the aggregator’s data and ASP app data>&scope=<NV2.X scope>
+```
+
+Advanced app clip experience:
 ```text
 https://<carrier-app-domain-and-base-path>?app_info_jwt=<signed by the aggregator and includes the aggregator’s data and ASP app data>&scope=<NV2.X scope> 
 ```
+
 
 ## Troubleshooting 
 This section lists common issues encountered when integrating the SDK and how to resolve them. 
@@ -280,12 +297,6 @@ The SDK is not invoked when launched via an App Clip URL.
 - The carrier handover HTML page is missing required metadata or invocation parameters
 - The invocation URL is not opened in the Safari browser
 
-
-- Apple carrier entitlements for the Carrier app, which allow the SDK to retrieve the carrier token
-- Carrier handover HTML page, which must be opened in the Safari browser
-- AASA file including the appropriate paths for invoking the Carrier app or App Clip
-
-
 **Resolution** 
 - Verify the `applinks:` configuration for both the Carrier app and App Clip targets
 - Ensure the AASA file includes the correct paths and bundle identifiers
@@ -311,5 +322,5 @@ Support is provided on a **best-effort basis**.
 
  
 ## License 
-See the "Aduna SDK Software License Agreement.pdf" file for details. 
+See the "Aduna SDK Source Available Software License Agreement.pdf" file for details. 
 

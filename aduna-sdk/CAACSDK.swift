@@ -36,16 +36,18 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
     }
 
     var useFixedCarrierToken: Bool
+    var useSecondFixedCarrierToken: Bool
     var caacAnalyticsDelegate: CAACAnalyticsDelegate?
     var expInSeconds: Int?
-    let constDelayInSec: Double = 0
+    let constDelayInSec: Int = 0
     var rCTThreshold: Double
     
     var uLinkModel:ULinkModel?
     var receivedJwt:ReceivedJwtModel?
 
-    init(useFixedCarrierToken: Bool = false, caacAnalyticsDelegate: CAACAnalyticsDelegate? = nil, expInSeconds: Int? = 120, rCTThreshold: Double? = 600) {
+    init(useFixedCarrierToken: Bool = false, useSecondFixedCarrierToken: Bool = false, caacAnalyticsDelegate: CAACAnalyticsDelegate? = nil, expInSeconds: Int? = 120, rCTThreshold: Double? = 600) {
         self.useFixedCarrierToken = useFixedCarrierToken
+        self.useSecondFixedCarrierToken = useSecondFixedCarrierToken
         self.caacAnalyticsDelegate = caacAnalyticsDelegate
         self.expInSeconds = expInSeconds
         self.rCTThreshold = rCTThreshold ?? 600
@@ -58,9 +60,9 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
         - invocationUrl: The url that was used to invoke the App or App Clip.
      - Returns: A ``CAACOperation``, if the url matches an operation that the SDK can handle. `nil`, otherwise.
      */
-    public static func getOperationFromUrl(invocationUrl: URL, cspOptions: CAACCSPOptions) -> CAACOperation?{
+    public static func getOperationFromUrl(invocationUrl: URL, cspOptions: CAACCSPOptions) async -> CAACOperation?{
         if let eNVOptions = cspOptions.eNVCSPOptions,
-           let eNVOperation = isValidENV(invocationUrl: invocationUrl,
+           let eNVOperation = await isValidENV(invocationUrl: invocationUrl,
                                          eNVCSPOptions: eNVOptions,
                                          caacAnalyticsDelegate: cspOptions.caacAnalyticsDelegate
            )
@@ -74,10 +76,10 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
     static func isValidENV(invocationUrl: URL,
                            eNVCSPOptions: ENVCSPOptions,
                            caacAnalyticsDelegate: CAACAnalyticsDelegate?
-    ) -> ENVOperation? {
-        let caacSDK = CAACSDK(useFixedCarrierToken: eNVCSPOptions.useFixedCarrierToken, caacAnalyticsDelegate: caacAnalyticsDelegate, expInSeconds: eNVCSPOptions.expInSeconds, rCTThreshold: eNVCSPOptions.rCTThreshold)
+    ) async -> ENVOperation? {
+        let caacSDK = CAACSDK(useFixedCarrierToken: eNVCSPOptions.useFixedCarrierToken, useSecondFixedCarrierToken: eNVCSPOptions.useSecondFixedCarrierToken, caacAnalyticsDelegate: caacAnalyticsDelegate, expInSeconds: eNVCSPOptions.expInSeconds, rCTThreshold: eNVCSPOptions.rCTThreshold)
        
-        let receivedModel = caacSDK.parseUrl(invUrl: invocationUrl)
+        let receivedModel = await caacSDK.parseUrl(invUrl: invocationUrl)
         caacSDK.uLinkModel = receivedModel
         if receivedModel != nil {
             return ENVOperation(sdk: caacSDK, eNVCSPOptions: eNVCSPOptions)
@@ -98,15 +100,17 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
         }
         
         getCarrierToken { [self] tokens in
-            guard let tokens = tokens, let firstToken = tokens.first
+            guard let tokens = tokens, !tokens.isEmpty
             else {
                 SDKLogger.error("No tokens received")
-                sendErrorResponseWithAppCallbackUrl(
-                    error: ErrorModel(errorCode: .user_activity, errorDescription: .CANNOT_REGISTER_TO_CARRIER),
-                    appurl: uLinkModel?.appCallbackUrl
-                ) {
-                    // Once the URL has been opened (or failed), exit the app:
-                    DispatchQueue.main.async {
+                Task { @MainActor in
+                    sendErrorResponseWithAppCallbackUrl(
+                        error: ErrorModel(
+                            errorCode: .user_activity,
+                            errorDescription: .CANNOT_REGISTER_TO_CARRIER
+                        ),
+                        appurl: uLinkModel?.appCallbackUrl
+                    ) {
                         self.exitApp()
                     }
                 }
@@ -114,46 +118,48 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             }
 
             do {
-                
                 guard
-                    let aggregator1 = payload["credentialId"] as? String,
-                    let vctValues = payload["vctValues"] as? [String],
-                    let headerTyp = payload["responseJwtType"] as? String
+                    let aggregator1 = payload["credentialId"] as? String ?? payload["credential_id"] as? String,
+                    let vctValues = payload["vctValues"] as? [String] ?? payload["vct_values"] as? [String],
+                    let headerTyp = payload["responseJwtType"] as? String ?? payload["response_jwt_type"] as? String
                 else {
                     SDKLogger.error("Missing parameter in jwt payload")
-                    sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: FlowErrorDescription.MISSING_MANDATORY_PARAMETER),
-                        appurl: uLinkModel?.appCallbackUrl
-                    ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
+                    Task { @MainActor in
+                        sendErrorResponseWithAppCallbackUrl(
+                            error: ErrorModel(
+                                errorCode: .jwt_analysis,
+                                errorDescription: FlowErrorDescription.MISSING_MANDATORY_PARAMETER
+                            ),
+                            appurl: uLinkModel?.appCallbackUrl
+                        ) {
                             self.exitApp()
                         }
                     }
                     return
                 }
                 
-                let jweToken = try encryptTokenFromPayload(payload: payload, tokenToEncrypt: firstToken)
-                SDKLogger.debug("Encrypted JWE carrier token: \(jweToken)")
+                let sdkPrivateSecKey = try loadOrCreatePrivateKey()
                 
-                do {
-                    let sdkPrivateSecKey = try loadOrCreatePrivateKey()
-                    
-                    let issuerJwt = try createIssuerJWT(
-                        sdkPrivateSecKey: sdkPrivateSecKey,
-                        headerTyp: headerTyp,
-                        vct: vctValues,
-                        expInSeconds: self.expInSeconds ?? 120
-                    )
-                    SDKLogger.debug("Issuer JWT: \(issuerJwt)")
-                    
-                    let consentData = payload["consent_data"] as? String ?? ""
-                    let nonce = payload["nonce"] as? String ?? ""
-                    SDKLogger.debug("Consent data: \(consentData)\nNonce: \(nonce)")
+                let issuerJwt = try createIssuerJWT(
+                    sdkPrivateSecKey: sdkPrivateSecKey,
+                    headerTyp: headerTyp,
+                    vct: vctValues,
+                    expInSeconds: self.expInSeconds ?? 120
+                )
+                SDKLogger.debug("Issuer JWT: \(issuerJwt)")
+                
+                let consentData = payload["consent_data"] as? String ?? ""
+                let nonce = payload["nonce"] as? String ?? ""
+                SDKLogger.debug("Consent data: \(consentData)\nNonce: \(nonce)")
 
-                    let carrierHint = payload["carrierHint"] as? String ?? ""
-                    SDKLogger.debug("Carrier hint is:\(carrierHint)")
+                let carrierHint = payload["carrierHint"] as? String ?? payload["carrier_hint"] as? String ?? ""
+                SDKLogger.debug("Carrier hint is:\(carrierHint)")
 
+                var combinedJwtArray: [String] = []
+
+                for token in tokens {
+                    let jweToken = try encryptTokenFromPayload(payload: payload, tokenToEncrypt: token)
+                    SDKLogger.debug("Encrypted JWE carrier token: \(jweToken)")
                     
                     let keyBindingJwt = try createKeyBindingJWT(
                         privateSecKey: sdkPrivateSecKey,
@@ -168,62 +174,49 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                     SDKLogger.debug("Binding JWT: \(keyBindingJwt)")
                     
                     let combinedJwtString = issuerJwt + "~" + keyBindingJwt
-                    
-                    let vpToken = [aggregator1: [combinedJwtString]]
+                    combinedJwtArray.append(combinedJwtString)
+                }
+                
+                let vpToken = [aggregator1: combinedJwtArray]
 
-                    let dataResponse = DataResponse(vp_token: vpToken)
-                    let responseModel = ResponseJwtModel(protocol: "openid4vp-v1-unsigned", data: dataResponse)
+                let dataResponse = DataResponse(vp_token: vpToken)
+                let responseModel = ResponseJwtModel(protocol: "openid4vp-v1-unsigned", data: dataResponse)
 
-                    // this is to print responseModel
-                    let encoder = JSONEncoder()
-                    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+                // this is to print responseModel
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
-                    if let jsonData = try? encoder.encode(responseModel),
-                       let jsonString = String(data: jsonData, encoding: .utf8) {
-                        SDKLogger.debug("OpenID4VP Response is \(jsonString)")
-                    }
-                    // omit if print of responseModel is not needed
-                    
+                if let jsonData = try? encoder.encode(responseModel),
+                   let jsonString = String(data: jsonData, encoding: .utf8) {
+                    SDKLogger.debug("OpenID4VP Response is \(jsonString)")
+                }
+                // omit if print of responseModel is not needed
+                Task { @MainActor in
                     sendResponseWithAppCallbackUrl(
                         response: responseModel
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
-                    }
-                    
-                } catch {
-                    SDKLogger.error("Failed to create JWT: \(error.localizedDescription)")
-                    sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_creation, errorDescription: FlowErrorDescription(rawValue: error.localizedDescription) ?? .GENERIC_ERROR),
-                        appurl: uLinkModel?.appCallbackUrl
-                    ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
-                    }
-                    return
-                }
-        
-                
-            } catch {
-                SDKLogger.error("Encryption failed: \(error.localizedDescription)")
-                sendErrorResponseWithAppCallbackUrl(
-                    error: ErrorModel(errorCode: .jwe_creation, errorDescription: FlowErrorDescription(rawValue: error.localizedDescription) ?? .GENERIC_ERROR),
-                    appurl: uLinkModel?.appCallbackUrl
-                ) {
-                    // Once the URL has been opened (or failed), exit the app:
-                    DispatchQueue.main.async {
                         self.exitApp()
                     }
                 }
-                return
+                    
+            } catch {
+                SDKLogger.error("Failed to create JWT: \(error.localizedDescription)")
+                Task { @MainActor in
+                    sendErrorResponseWithAppCallbackUrl(
+                        error: ErrorModel(
+                            errorCode: .jwt_creation,
+                            errorDescription: FlowErrorDescription(rawValue: error.localizedDescription) ?? .GENERIC_ERROR
+                        ),
+                        appurl: uLinkModel?.appCallbackUrl
+                    ) {
+                        self.exitApp()
+                    }
+                }
             }
         }
     }
     
+    @MainActor
     func sendErrorResponseWithAppCallbackUrl(
         error: ErrorModel,
         appurl: URL?,
@@ -261,6 +254,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
         }
     }
     
+    @MainActor
     func sendResponseWithAppCallbackUrl<T: Encodable>(
         response: T,
         onComplete: @escaping () -> Void
@@ -306,6 +300,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
     
     }
     
+    @MainActor
     func exitApp(){
         caacAnalyticsDelegate?.eventReport(event: .envExitingAppEvent, properties: nil)
         exit(0)
@@ -345,7 +340,6 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             guard self.completion != nil else { return }
             
             if let refreshedToken = subscriber.carrierToken?.base64EncodedString(){
-                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token refreshed for \(subscriber.identifier):": true])
                 self.refreshedTokens.append(refreshedToken)
                 
                 // print part of refreshed carrier token
@@ -356,7 +350,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                     printedRefreshedToken = "\(firstPart)...\(lastPart)"
                 }
                 SDKLogger.debug("Refreshed token: \(printedRefreshedToken)")
-                
+                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token \(printedRefreshedToken) refreshed for \(subscriber.identifier):": true])
             }
             else {
                 self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Carrier token refreshed for \(subscriber.identifier):": false])
@@ -378,7 +372,11 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             if self.useFixedCarrierToken {
                 var tokens: [String]? = []
                 SDKLogger.debug("Fixed carrier token is used")
-                tokens?.append("insert_here_your_testing_carrier_token")
+                tokens?.append("id-0001")
+                if self.useSecondFixedCarrierToken {
+                    tokens?.append("id-0002")
+                }
+                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["FCTokens found": tokens?.count ?? 0])
                 completion?(tokens)
             }
             else {
@@ -389,14 +387,29 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 self.activeSubscribers.removeAll()
                 self.completion = completion
                                 
+                var activeSubscribers: [CTSubscriber] = []
                 let subscribers = Array(CTSubscriberInfo.subscribers())
-                self.activeSubscribers = subscribers
+                for subscriber in subscribers {
+                    if subscriber.isSIMInserted {
+                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["isSIMInserted for subscriber \(subscriber.identifier)":true])
+                        SDKLogger.debug("SIM \(subscriber.identifier) matches the app’s carrier descriptors.")
+                        activeSubscribers.append(subscriber)
+                    }
+                    else {
+                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["isSIMInserted for subscriber \(subscriber.identifier)":false])
+                        SDKLogger.debug("SIM \(subscriber.identifier) does not match the app’s carrier descriptors.")
+                    }
+                }
+                self.activeSubscribers = activeSubscribers
                 
-                if subscribers.isEmpty {
-                    SDKLogger.debug("Empty array of subscribers-SIMs")
+                if activeSubscribers.isEmpty {
+                    SDKLogger.debug("Empty array of active subscribers-SIMs")
+                    self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["No active SIM available": true])
                     self.finalizeAndCallback()
                     return
                 }
+                
+                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Active SIMs found": activeSubscribers.count])
                 
                 let now = Date().timeIntervalSince1970
                 SDKLogger.debug("Refresh Carrier Token Timer \(self.RCTTimer)")
@@ -405,14 +418,14 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                     SDKLogger.debug("Threshold for Refresh Carrier Token (in seconds) \(self.rCTThreshold)")
                     if elapsed >= self.rCTThreshold { //if threshold passed, refresh carrier token
                         SDKLogger.debug("Time elapsed since last refresh of carrier token (seconds): \(elapsed)\nThreshold passed-Refresh carrier token")
-                        self.refreshCarrierToken(now: now, subscribers: subscribers)
+                        self.refreshCarrierToken(now: now, subscribers: activeSubscribers)
                     } else { // threshold not passed - use the existing carrier token
                         SDKLogger.debug("Time elapsed since last refresh of carrier token (seconds): \(elapsed)\nThreshold not passed-Fetch existing carrier token")
                         var currentTokens: [String]? = []
-                        for subscriber in subscribers {
+                        for subscriber in activeSubscribers {
                             if let currentToken = subscriber.carrierToken?.base64EncodedString() {
                                 currentTokens?.append(currentToken)
-                        
+                                
                                 // print part of existing carrier token
                                 var printedExistingToken = "nil"
                                 if (currentToken.count > 13) {
@@ -421,16 +434,16 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                                     printedExistingToken = "\(firstPart)...\(lastPart)"
                                 }
                                 SDKLogger.debug("Existing token is: \(printedExistingToken)")
-                                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Fetching of existing carrier token for subscriber \(subscriber.identifier)":true])
+                                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Fetching of existing carrier token \(printedExistingToken) for subscriber \(subscriber.identifier)":true])
                             }
                             else {
+                                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Fetching of existing carrier token for subscriber \(subscriber.identifier)":false])
                                 SDKLogger.debug("No token for \(subscriber.identifier)")
                             }
-                            
                         }
                         if currentTokens == [] {
                             SDKLogger.debug("No existing token found - Refresh triggered")
-                            self.refreshCarrierToken(now: now, subscribers: subscribers)
+                            self.refreshCarrierToken(now: now, subscribers: activeSubscribers)
                         }
                         else {
                             completion?(currentTokens)
@@ -440,7 +453,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 else { // no carrier token fetched yet
                     SDKLogger.debug("First attempt to refresh carrier token: true")
                     self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["First attempt to refresh carrier token": true])
-                    self.refreshCarrierToken(now: now, subscribers: subscribers)
+                    self.refreshCarrierToken(now: now, subscribers: activeSubscribers)
                 }
                 
             }
@@ -508,9 +521,13 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
     }
     
     // Function to parse url for NV2.0 
-    private func parseUrl(invUrl: URL) -> ULinkModel? {
-        SDKLogger.debug("This is the invocation url: \(invUrl)")
+    private func parseUrl(invUrl: URL) async -> ULinkModel? {
+        let sdkBundle = Bundle(for: CAACSDK.self)
+        let version = sdkBundle.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
         
+        SDKLogger.debug("This is the invocation url: \(invUrl)")
+        caacAnalyticsDelegate?.eventReport(event: .envProgressScreen, properties: ["SDK Version": version])
+
         var urlString = invUrl.absoluteString
         if let range = urlString.range(of: "#") {
             urlString.replaceSubrange(range, with: "?")
@@ -524,12 +541,13 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             return nil
         }
         
-        SDKLogger.debug("This is the invocation url after:\(String(describing: url))")
         let validScopes = ["dpv:FraudPreventionAndDetection#number-verification-verify-read",
                            "dpv:FraudPreventionAndDetection#number-verification:verify",
                            "dpv:FraudPreventionAndDetection#number-verification:device-phone-number:read",
                            "openid dpv:FraudPreventionAndDetection number-verification:device-phone-number:read",
-                           "openid dpv:FraudPreventionAndDetection number-verification:verify"]
+                           "openid dpv:FraudPreventionAndDetection number-verification:verify",
+                           "dpv:FraudPreventionAndDetection number-verification:device-phone-number:read",
+                           "dpv:FraudPreventionAndDetection number-verification:verify"]
         
         guard let appInfoJwt = url.valueOf("app_info_jwt"),
               let scope = url.valueOf("scope")
@@ -571,20 +589,53 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                     The JWT contains the following headers:
                         - alg; The JWT algorithm. Will be 'ES256'
                         - typ; The type of the JWT. Will be 'oauth-authz-req+jwt'
-                        - x5c; The certificate chain of Aduna. The leaf certificate should be used to verify the signing of the JWT.
-                               The root certificate should be used to verify the authenticity of the JWT.
+                        - x5c or x5u; The certificate chain of Aduna. The leaf certificate should be used to verify the signing of the JWT.
+                        The root certificate should be used to verify the authenticity of the JWT.
             */
-            guard let certificatesAppInfo = extractCertificatesFromHeader(header: headerAppInfo)
+          
+            let certificates: [SecCertificate]?
+
+            do {
+                certificates = try await withTimeout(seconds: 2.0) {
+                    await extractCertificatesFromHeader(header: headerAppInfo)
+                }
+            } catch CertificateExtractionError.timeout {
+                SDKLogger.error("App Info JWT certificate extraction timed out.")
+
+                let errorCode = FlowErrorCode.jwt_analysis.rawValue
+                let errorDescription = FlowErrorDescription.TIME_OUT.rawValue
+
+                caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
+                return nil
+            } catch {
+                SDKLogger.error("Unexpected error during App Info JWT certificate extraction: \(error.localizedDescription)")
+                let errorCode = FlowErrorCode.jwt_analysis.rawValue
+                let errorDescription = FlowErrorDescription.CERTIFICATE_EXTRACTION_FAILED.rawValue
+                caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
+                return nil
+            }
+            
+            guard let certificatesAppInfo = certificates
             else {
                 SDKLogger.error("Failed to parse App Info JWT certificate.")
+                let certType: String
+                if let _ = headerAppInfo["x5c"] as? [String] {
+                    certType = "x5c"
+                }
+                else if let _ = headerAppInfo["x5u"] as? String {
+                    certType = "x5u"
+                }
+                else {
+                    certType = "no_x5c_no_x5u"
+                }
                 let errorCode = FlowErrorCode.jwt_analysis.rawValue
-                let errorDescription = FlowErrorDescription.ERROR_IN_CERTIFICATE_CHAIN.rawValue
-                caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
+                let errorDescription = FlowErrorDescription.CERTIFICATE_EXTRACTION_FAILED.rawValue
+                caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription, "cert_header": certType])
                 return nil
             }
 
             for (i, cert) in certificatesAppInfo.enumerated() {
-                SDKLogger.debug("x5c[\(i)] subject: \(String(describing: SecCertificateCopySubjectSummary(cert)))")
+                SDKLogger.debug("x5c/x5u[\(i)] subject: \(String(describing: SecCertificateCopySubjectSummary(cert)))")
             }
             
             
@@ -601,7 +652,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             }
             
             // This is to extract DNS and fingerprint from root certificate in order to check if the issuer is trusted.
-            guard let certIdAppInfo = extractCertificateIdentityFromJWTHeader(header: headerAppInfo)
+            guard let certIdAppInfo = extractCertificateIdentity(from: certificatesAppInfo)
             else {
                 SDKLogger.error("Failed to parse appInfo JWT certificate.")
                 let errorCode = FlowErrorCode.jwt_analysis.rawValue
@@ -652,7 +703,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             }
 
             guard
-                let appCallbackUrlString = payloadAppInfo["appCallbackUrl"] as? String,
+                let appCallbackUrlString = payloadAppInfo["appCallbackUrl"] as? String ?? payloadAppInfo["redirect_uri"] as? String,
                 let appCallbackUrl       = URL(string: appCallbackUrlString)
             else {
                 SDKLogger.error("Missing or invalid appCallbackUrl in AppCallback JWT")
@@ -682,15 +733,17 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 let errorDescription = FlowErrorDescription.MISSING_MANDATORY_PARAMETER.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription, "parameter": "in_jwt_header"])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .MISSING_MANDATORY_PARAMETER),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .MISSING_MANDATORY_PARAMETER
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
                     
                 }
@@ -705,15 +758,17 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 let errorDescription = FlowErrorDescription.UNSUPPORTED_JWT_ALGORITHM.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .UNSUPPORTED_JWT_ALGORITHM),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .UNSUPPORTED_JWT_ALGORITHM
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
                     
                 }
@@ -728,15 +783,17 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 let errorDescription = FlowErrorDescription.UNSUPPORTED_JWT_TYPE.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .UNSUPPORTED_JWT_TYPE),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .UNSUPPORTED_JWT_TYPE
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
                     
                 }
@@ -748,43 +805,46 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             
             /* ------------------- PAYLOAD ANALYSIS ----------------------
                       The JWT contains the following claims:
-                        - appName; The name of the application in a readable format
-                        - appCallbackUrl; The URL to return the focus to the ASP application from the CSP Application/App Clip
-                        - carrierHint; The carrier PLMN ID in the format '&lt;mcc&gt;&lt;mnc&gt;'
-                        - clientId; The client ID of the application for the CSP
-                        - credentialId; The 'vpRequest.credentialId' value from the request to identify the returned temp-/carrier-token in the response from the CSP Application/App Clip
-                        - encryptedResponseEncValuesSupported; The supported encryption algorithm(s) as part of the ECDH-ES algorithm to encrypt the temp-/carrier-token. Is an array of strings. The supported value is 'A128GCM'
+                        - app_name; The name of the application in a readable format
+                        - redirect_uri; The URL to return the focus to the ASP application from the CSP Application/App Clip
+                        - carrier_hint; The carrier PLMN ID in the format '&lt;mcc&gt;&lt;mnc&gt;'
+                        - client_id; The client ID of the application for the CSP
+                        - credential_id; The 'vpRequest.credential_id' value from the request to identify the returned temp-/carrier-token in the response from the CSP Application/App Clip
+                        - encrypted_response_enc_values_supported; The supported encryption algorithm(s) as part of the ECDH-ES algorithm to encrypt the temp-/carrier-token. Is an array of strings. The supported value is 'A128GCM'
                         - exp; The expiry time of this JWT
                         - iat; The creation time of this JWT
                         - iss; The issuer of the JWT indicating Aduna
                         - jwks; The ephemeral public key used with the ECDH-ES algorithm to encrypt the temp-/carrier-token
                         - nonce; The nonce should be copied as is to the response claim
-                        - responseJwtType; The 'typ' value of the Issuer JWT (as part of the operator token) in the response from the CSP Application/App Clip. Will be 'dc-authorization+sd-jwt'
+                        - response_jwt_type; The 'typ' value of the Issuer JWT (as part of the operator token) in the response from the CSP Application/App Clip. Will be 'dc-authorization+sd-jwt'
                         - scope; The scope(s) of the request
                         - state; The state should be copied as is to the response claim
-                        - vctValues; The VCT values to acquire the temp-/carrier-token for
+                        - vct_values; The VCT values to acquire the temp-/carrier-token for
             */
             
             let aggrState = payloadAppInfo["state"] as? String
             SDKLogger.debug("aggregator state is \(aggrState ?? "not found")")
 
             guard
-                var appName = payloadAppInfo["appName"] as? String
+                var appName = payloadAppInfo["appName"] as? String ?? payloadAppInfo["app_name"] as? String
             else {
                 SDKLogger.error("Missing appName in AppCallback JWT")
                 let errorCode = FlowErrorCode.jwt_analysis.rawValue
                 let errorDescription = FlowErrorDescription.APP_INFO_MANDATORY_DATA_ARE_MISSING.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .APP_INFO_MANDATORY_DATA_ARE_MISSING),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .APP_INFO_MANDATORY_DATA_ARE_MISSING
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
+                    
                 }
                 return ULinkModel(payload: nil, appCallbackUrl: appCallbackUrl, state: aggrState ?? "", appName: "", aspState: url.valueOf("state"), performNumberVerification: false)
             }
@@ -799,37 +859,42 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 let errorDescription = FlowErrorDescription.SCOPE_MISMATCH.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .SCOPE_MISMATCH),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .SCOPE_MISMATCH
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
+                    
                 }
                 return ULinkModel(payload: nil, appCallbackUrl: appCallbackUrl, state: aggrState ?? "", appName: appName, aspState: url.valueOf("state"), performNumberVerification: false)
             }
     
             guard
-                let encArray = payloadAppInfo["encryptedResponseEncValuesSupported"] as? [String]
+                let encArray = payloadAppInfo["encryptedResponseEncValuesSupported"] as? [String] ?? payloadAppInfo["encrypted_response_enc_values_supported"] as? [String]
             else {
-                SDKLogger.error("encryptedResponseEncValuesSupported not found")
+                SDKLogger.error("encrypted_response_enc_values_supported not found")
                 let errorCode = FlowErrorCode.jwt_analysis.rawValue
                 let errorDescription = FlowErrorDescription.MISSING_MANDATORY_PARAMETER.rawValue
-                caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription, "parameter": "encryptedResponseEncValuesSupported"])
+                caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription, "parameter": "encrypted_response_enc_values_supported"])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .MISSING_MANDATORY_PARAMETER),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .MISSING_MANDATORY_PARAMETER
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
                 }
                 return ULinkModel(payload: payloadAppInfo, appCallbackUrl: appCallbackUrl, state: aggrState ?? "", appName: appName, aspState: url.valueOf("state"), performNumberVerification: false)
@@ -838,30 +903,32 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             let encStr = encArray.joined(separator: ",")
             SDKLogger.debug("encrypted response is \(encStr)")
             guard encArray.contains("A128GCM") else {
-                SDKLogger.error("Not supported encryptedResponseEncValuesSupported")
+                SDKLogger.error("Not supported encrypted_response_enc_values_supported")
                 let errorCode = FlowErrorCode.jwt_analysis.rawValue
                 let errorDescription = FlowErrorDescription.UNSUPPORTED_ENCRYPTED_RESPONSE_ENC_VALUE.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .UNSUPPORTED_ENCRYPTED_RESPONSE_ENC_VALUE),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .UNSUPPORTED_ENCRYPTED_RESPONSE_ENC_VALUE
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
                 }
                 return ULinkModel(payload: payloadAppInfo, appCallbackUrl: appCallbackUrl, state: aggrState ?? "", appName: appName, aspState: url.valueOf("state"), performNumberVerification: false)
             }
             
             guard
-                let _ = payloadAppInfo["credentialId"] as? String,
+                let _ = payloadAppInfo["credentialId"] as? String ?? payloadAppInfo["credential_id"] as? String,
                 let _ = payloadAppInfo["nonce"] as? String,
-                let _ = payloadAppInfo["vctValues"] as? [String],
-                let _ = payloadAppInfo["responseJwtType"] as? String,
+                let _ = payloadAppInfo["vctValues"] as? [String] ?? payloadAppInfo["vct_values"] as? [String],
+                let _ = payloadAppInfo["responseJwtType"] as? String ?? payloadAppInfo["response_jwt_type"] as? String,
                 let jwks = payloadAppInfo["jwks"] as? [String: Any]
             else {
                 SDKLogger.error("Missing parameter in jwt payload")
@@ -869,15 +936,17 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 let errorDescription = FlowErrorDescription.MISSING_MANDATORY_PARAMETER.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription, "parameter": "in_jwt_payload"])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .MISSING_MANDATORY_PARAMETER),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .MISSING_MANDATORY_PARAMETER
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
                 }
                 return ULinkModel(payload: payloadAppInfo, appCallbackUrl: appCallbackUrl, state: aggrState ?? "", appName: appName, aspState: url.valueOf("state"), performNumberVerification: false)
@@ -900,15 +969,17 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 let errorDescription = FlowErrorDescription.MALFORMED_JWS_FORMAT.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + constDelayInSec) {
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(constDelayInSec * 1_000_000_000))
+
                     self.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .jwt_analysis, errorDescription: .MALFORMED_JWS_FORMAT),
+                        error: ErrorModel(
+                            errorCode: .jwt_analysis,
+                            errorDescription: .MALFORMED_JWS_FORMAT
+                        ),
                         appurl: appCallbackUrl
                     ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        DispatchQueue.main.async {
-                            self.exitApp()
-                        }
+                        self.exitApp()
                     }
                 }
                 return ULinkModel(payload: payloadAppInfo, appCallbackUrl: appCallbackUrl, state: aggrState ?? "", appName: appName, aspState: url.valueOf("state"), performNumberVerification: false)
@@ -930,6 +1001,29 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
         }
 
        
+    }
+    
+    enum CertificateExtractionError: Error {
+        case timeout
+    }
+    private func withTimeout<T>(
+        seconds: Double,
+        operation: @escaping @Sendable () async -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask {
+                await operation()
+            }
+
+            group.addTask {
+                try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                throw CertificateExtractionError.timeout
+            }
+
+            let result = try await group.next()!
+            group.cancelAll()
+            return result
+        }
     }
     
     final class NetworkStatus {

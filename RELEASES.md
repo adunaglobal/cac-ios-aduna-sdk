@@ -2,6 +2,12 @@
 
 ## Release Notes
 
+### 0.9.0
+#### Updates
+- Security Enhancements (x5u support)
+- Performance improvements
+- Support of dual SIM
+ 
 ### 0.8.10
 #### Other
 - Solution optimization

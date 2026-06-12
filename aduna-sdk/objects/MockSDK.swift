@@ -20,7 +20,7 @@ internal class MockSDK: CAACSDK{
     
     init(wantedState: MockState) {
         self.wantedState = wantedState
-        super.init(useFixedCarrierToken: true, expInSeconds: 120)
+        super.init(useFixedCarrierToken: true, useSecondFixedCarrierToken: false, expInSeconds: 120)
     }
     
     override func performNumberVerification() {}

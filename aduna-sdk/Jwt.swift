@@ -39,13 +39,21 @@ func decodeJWTComponents(_ jwt: String) throws -> (header: [String: Any], payloa
     return (headerJson, payloadJson, signatureData)
 }
 
-func extractCertificatesFromHeader(header: [String: Any]) -> [SecCertificate]? {
-    guard let x5cArray = header["x5c"] as? [String],
-          !x5cArray.isEmpty
-    else {
-        return nil
+func extractCertificatesFromHeader(header: [String: Any]) async -> [SecCertificate]? {
+    if let x5cArray = header["x5c"] as? [String],!x5cArray.isEmpty {
+        SDKLogger.debug("Starting x5c certificate extraction.")
+        return extractCertificatesFromX5C(x5cArray)
     }
+    
+    if let x5uString = header["x5u"] as? String, !x5uString.isEmpty {
+        SDKLogger.debug("Starting x5u certificate extraction.")
+        return await extractCertificatesFromX5U(x5uString)
+    }
+    
+    return nil
+}
 
+private func extractCertificatesFromX5C(_ x5cArray: [String]) -> [SecCertificate]? {
     var certificates: [SecCertificate] = []
 
     for certBase64 in x5cArray {
@@ -54,6 +62,87 @@ func extractCertificatesFromHeader(header: [String: Any]) -> [SecCertificate]? {
         else {
             return nil
         }
+        certificates.append(cert)
+    }
+
+    return certificates
+}
+
+private func extractCertificatesFromX5U(_ x5uString: String) async -> [SecCertificate]? {
+    SDKLogger.debug("x5u URL string: \(x5uString)")
+    guard let url = URL(string: x5uString),
+          url.scheme?.lowercased() == "https"
+    else {
+        SDKLogger.error("Invalid x5u URL or non-HTTPS scheme")
+        return nil
+    }
+
+    do {
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse
+        else {
+            SDKLogger.error("x5u GET request failed")
+            return nil
+        }
+        
+        SDKLogger.debug("x5u GET response with status code: \(httpResponse.statusCode)")
+
+        guard (200...299).contains(httpResponse.statusCode)
+        else {
+            SDKLogger.error("x5u GET request failed with invalid status")
+            return nil
+        }
+
+
+        guard let pemString = String(data: data, encoding: .utf8) else {
+            SDKLogger.error("Unable to decode x5u response as UTF-8 PEM")
+            return nil
+        }
+
+        return extractCertificatesFromPEMChain(pemString)
+    } catch {
+        SDKLogger.error("x5u GET request failed: \(error.localizedDescription)")
+        return nil
+    }
+}
+
+private func extractCertificatesFromPEMChain(_ pemString: String) -> [SecCertificate]? {
+    let pattern = "-----BEGIN CERTIFICATE-----([\\s\\S]*?)-----END CERTIFICATE-----"
+
+    guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+        SDKLogger.error("Failed to create regex for PEM parsing")
+        return nil
+    }
+
+    let nsRange = NSRange(pemString.startIndex..<pemString.endIndex, in: pemString)
+    let matches = regex.matches(in: pemString, options: [], range: nsRange)
+
+    SDKLogger.debug("Found \(matches.count) PEM certificate blocks")
+
+    guard !matches.isEmpty else {
+        SDKLogger.error("No PEM certificates found in x5u response")
+        return nil
+    }
+
+    var certificates: [SecCertificate] = []
+
+    for match in matches {
+        guard match.numberOfRanges > 1,
+              let base64Range = Range(match.range(at: 1), in: pemString) else {
+            return nil
+        }
+
+        let base64Body = pemString[base64Range]
+            .components(separatedBy: .whitespacesAndNewlines)
+            .joined()
+
+        guard let certData = Data(base64Encoded: base64Body),
+              let cert = SecCertificateCreateWithData(nil, certData as CFData) else {
+            SDKLogger.error("Failed to create SecCertificate from PEM block")
+            return nil
+        }
+
         certificates.append(cert)
     }
 
@@ -110,17 +199,20 @@ func verifyChain(certificates: [SecCertificate]) -> Bool {
     return false
 }
 
-func extractCertificateIdentityFromJWTHeader(header: [String: Any]) -> CertIdentity? {
-    
-    guard let x5cArray = header["x5c"] as? [String],
-          let certBase64 = x5cArray.last,     // last in the array is the root certificate
-          let certData = Data(base64Encoded: certBase64, options: [.ignoreUnknownCharacters]),
-          let dns = dnsNameFromCertDER(certData)
-    else {
+func extractCertificateIdentity(from certificates: [SecCertificate]) -> CertIdentity? {
+    guard let rootCert = certificates.last else {
+        SDKLogger.error("No certificates available for root identity extraction")
+        return nil
+    }
+        
+    let certData = SecCertificateCopyData(rootCert) as Data
+
+    guard let dns = dnsNameFromCertDER(certData) else {
+        SDKLogger.error("No DNS name found in root certificate")
         return nil
     }
 
-    SDKLogger.debug("DNS name is: \(dns)")
+    SDKLogger.debug("Root DNS name is: \(dns)")
 
     // Compute SHA-256 fingerprint over full DER
     let digest = SHA256.hash(data: certData)
@@ -141,11 +233,11 @@ func validateJwtLifetime(payload: [String: Any]) -> Bool {
     
     let expirationDate = Date(timeIntervalSince1970: exp)
     if expirationDate < Date() {
-        SDKLogger.error("Token expired at \(expirationDate)")
+        SDKLogger.error("JWT lifetime expired at \(expirationDate)")
         return false
     }
     else {
-        SDKLogger.debug("Token will expire at \(expirationDate)")
+        SDKLogger.debug("JWT lifetime will expire at \(expirationDate)")
         return true
     }
 }
@@ -153,6 +245,9 @@ func validateJwtLifetime(payload: [String: Any]) -> Bool {
 func validateClaims(payload: [String: Any], issuer: CertIdentity) -> Bool {
     let trustedIssuers: Set<CertIdentity> = [
         CertIdentity(dns: "dev.aggregator.com", sha256Fingerprint: "1E:A9:4E:85:CD:B8:04:0F:B9:EF:66:83:39:23:4A:A6:44:18:AB:30:CA:A7:48:36:4C:67:55:9E:17:6B:E4:B0"),
+        CertIdentity(dns: "dev.aggregator.com", sha256Fingerprint: "BF:33:FF:93:7E:ED:BD:81:57:A4:9D:0F:2F:5E:3D:15:37:ED:6D:9D:B2:AB:7B:49:E7:E5:7E:3D:39:B1:96:3A"),
+        CertIdentity(dns: "dev.aggregator.com", sha256Fingerprint: "75:75:D3:B1:9F:01:2A:27:32:3C:F0:D7:F2:B3:96:E7:65:F5:1F:68:92:C7:DC:31:05:25:6E:CD:E9:BA:B4:6F"),
+        CertIdentity(dns:"gnp.adunaglobal.net", sha256Fingerprint: "68:E8:BB:A4:F3:A2:19:36:2E:C1:7E:85:E5:40:86:6B:29:3B:3D:69:91:C0:0D:D8:AF:A7:77:27:B2:11:27:BF"),
         CertIdentity(dns:"gnp.adunaglobal.net", sha256Fingerprint: "DA:04:FC:63:10:53:79:BE:87:D3:48:E0:D4:DF:B2:14:18:A9:BE:9D:B7:F4:7C:86:DE:37:F6:0D:0B:03:E4:11")
 
     ]
@@ -264,7 +359,7 @@ func encryptTokenFromPayload(payload: [String: Any], tokenToEncrypt: String) thr
     // Extract encryption algorithm and content encryption method
     guard
         let algStr = keyData["alg"] as? String,
-        let encArray = payload["encryptedResponseEncValuesSupported"] as? [String],
+        let encArray = payload["encryptedResponseEncValuesSupported"] as? [String] ?? payload["encrypted_response_enc_values_supported"] as? [String],
         encArray.contains("A128GCM"),
         let alg = KeyManagementAlgorithm(rawValue: algStr),
         let enc = ContentEncryptionAlgorithm(rawValue: "A128GCM")

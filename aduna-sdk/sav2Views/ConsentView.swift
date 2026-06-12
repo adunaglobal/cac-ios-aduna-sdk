@@ -60,83 +60,86 @@ struct ENVConsentView: View {
     }
     
     public var body: some View {
-        HStack() {
-            Spacer().frame(width: appearance.text.sideSpacing)
-            VStack(alignment: appearance.text.alignment) {
-            Group {
-                Spacer()
-                    .frame(height: 25)
-                appearance.images.consentLogo
-                    .renderingMode(.original)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .padding(.top, 10)
-                    .padding(.horizontal, appearance.images.consentLogoHorizontalSpacing)
-                    .frame(height: 150)
-                Spacer()
-                    .frame(height: 50)
-                Text("You are using \(appName) application asking to verify your \(appearance.text.cspName) number.\n Press \"Begin Verification\" to start.", bundle: appearance.bundle)
-                    .multilineTextAlignment(appearance.text.alignment == .center ? .center : .leading)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.vertical, 15)
-                    .padding(.horizontal, 15)
-                Text("You only need to do this occasionally.", bundle: appearance.bundle)
-                    .multilineTextAlignment(appearance.text.alignment == .center ? .center : .leading )
-                    .padding(.vertical, 15.0)
-                Text("Simplified verification means\nno more SMS interruptions.", bundle: appearance.bundle)
-                    .multilineTextAlignment(appearance.text.alignment == .center ? .center : .leading )
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.vertical, 15.0)
-                if self.showProgressBar {
-                    ProgressView()
-                        .controlSize(.large)
-                        .scaleEffect(1.3, anchor: .center)
-                        .progressViewStyle(CircularProgressViewStyle(tint: appearance.spinnerColor))
-                        .padding()
-                }
-                Spacer()
-            }
-            .onReceive(countdownTimer) { _ in
-                if activeRemainingTime > 0 {
-                    activeRemainingTime -= 1
-                }
-                else {
-                    eNVsdk.caacAnalyticsDelegate?.eventReport(event: .envConsentTimedOutEvent, properties: nil)
-                    countdownTimer.upstream.connect().cancel()
-                    self.showProgressBar = true  // show progress bar
-                    self.cancelIsPressed = true  // buttons shall be disabled
-                    self.ongoingProcedure = true // buttons shall be disabled
-                    
-                    eNVsdk.sendErrorResponseWithAppCallbackUrl(
-                        error: ErrorModel(errorCode: .user_activity, errorDescription: .TIME_OUT),
-                        appurl: eNVsdk.uLinkModel?.appCallbackUrl
-                    ) {
-                        // Once the URL has been opened (or failed), exit the app:
-                        eNVsdk.exitApp()
-                    }
-                }
-            }
-            NavigationLink(destination: ENVContentView()
-                .environment(\.locale, sdkLocale)
-                .environmentObject(appearance)
-                .environmentObject(eNVsdk),
-                           tag: 1, selection: $action) {
-                EmptyView()
-            }
-            
-            AnyView(self.getPrimaryButton(buttonStyle: appearance.primaryButtonStyle))
-            AnyView(self.getSecondaryButton(buttonStyle: appearance.secondaryButtonStyle))
-            
-            Spacer()
-                .frame(height: 25.0)
-            }
-            if(appearance.text.alignment == .center){
+        NavigationStack {
+            HStack() {
                 Spacer().frame(width: appearance.text.sideSpacing)
-            }else {
-                Spacer(minLength: appearance.text.sideSpacing)
+                VStack(alignment: appearance.text.alignment) {
+                    Group {
+                        Spacer()
+                            .frame(height: 25)
+                        appearance.images.consentLogo
+                            .renderingMode(.original)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .padding(.top, 10)
+                            .padding(.horizontal, appearance.images.consentLogoHorizontalSpacing)
+                            .frame(height: 150)
+                        Spacer()
+                            .frame(height: 50)
+                        Text("You are using \(appName) application asking to verify your \(appearance.text.cspName) number.\n Press \"Begin Verification\" to start.", bundle: appearance.bundle)
+                            .multilineTextAlignment(appearance.text.alignment == .center ? .center : .leading)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.vertical, 15)
+                            .padding(.horizontal, 15)
+                        Text("You only need to do this occasionally.", bundle: appearance.bundle)
+                            .multilineTextAlignment(appearance.text.alignment == .center ? .center : .leading )
+                            .padding(.vertical, 15.0)
+                        Text("Simplified verification means\nno more SMS interruptions.", bundle: appearance.bundle)
+                            .multilineTextAlignment(appearance.text.alignment == .center ? .center : .leading )
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.vertical, 15.0)
+                        if self.showProgressBar {
+                            ProgressView()
+                                .controlSize(.large)
+                                .scaleEffect(1.3, anchor: .center)
+                                .progressViewStyle(CircularProgressViewStyle(tint: appearance.spinnerColor))
+                                .padding()
+                        }
+                        Spacer()
+                    }
+                    .onReceive(countdownTimer) { _ in
+                        if activeRemainingTime > 0 {
+                            activeRemainingTime -= 1
+                        }
+                        else {
+                            eNVsdk.caacAnalyticsDelegate?.eventReport(event: .envConsentTimedOutEvent, properties: nil)
+                            countdownTimer.upstream.connect().cancel()
+                            self.showProgressBar = true  // show progress bar
+                            self.cancelIsPressed = true  // buttons shall be disabled
+                            self.ongoingProcedure = true // buttons shall be disabled
+                            
+                            eNVsdk.sendErrorResponseWithAppCallbackUrl(
+                                error: ErrorModel(errorCode: .user_activity, errorDescription: .TIME_OUT),
+                                appurl: eNVsdk.uLinkModel?.appCallbackUrl
+                            ) {
+                                // Once the URL has been opened (or failed), exit the app:
+                                eNVsdk.exitApp()
+                            }
+                        }
+                    }
+                    AnyView(self.getPrimaryButton(buttonStyle: appearance.primaryButtonStyle))
+                    AnyView(self.getSecondaryButton(buttonStyle: appearance.secondaryButtonStyle))
+                    
+                    Spacer()
+                        .frame(height: 25.0)
+                }
+                if(appearance.text.alignment == .center){
+                    Spacer().frame(width: appearance.text.sideSpacing)
+                } else {
+                    Spacer(minLength: appearance.text.sideSpacing)
+                }
             }
+            .navigationDestination(isPresented: Binding(
+                            get: { action == 1 },
+                            set: { if !$0 { action = nil } }
+                        )) {
+                            ENVContentView()
+                                .environment(\.locale, sdkLocale)
+                                .environmentObject(appearance)
+                                .environmentObject(eNVsdk)
+                        }
         }
         .frame(minWidth: 0, maxWidth: .infinity)
         .background(AnyView(appearance.backgroundStyle))

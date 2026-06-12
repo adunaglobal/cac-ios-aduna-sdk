@@ -33,19 +33,20 @@ struct SampleView: View {
     }
     
     func handleInvocationUrl(invocationUrl: URL?) {
-        let cspOptions = CAACCSPOptions.Builder()
+        Task {
+            let cspOptions = CAACCSPOptions.Builder()
             .addENVOptions(useFixedCarrierToken: false,
+                           useSecondFixedCarrierToken: false,
                            skipConsentScreen: false,
                            envAppearance: ENVAppearance(),
                            expInSeconds: 120,
                            rCTThreshold = 600)
             .build()
         
-        if let invocationUrl = invocationUrl,
-           let operation =  CAACSDK.getOperationFromUrl(invocationUrl: invocationUrl,
-                                                        cspOptions: cspOptions)
-        {
-            caacOperation = operation
+            if let invocationUrl = invocationUrl,
+               let operation =  await CAACSDK.getOperationFromUrl(invocationUrl: invocationUrl, cspOptions: cspOptions){
+                caacOperation = operation
+            }
         }
     }
 }

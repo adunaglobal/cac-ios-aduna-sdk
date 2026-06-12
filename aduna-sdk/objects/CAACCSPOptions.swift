@@ -32,12 +32,14 @@ public class CAACCSPOptions{
          */
         public func addENVOptions(
             useFixedCarrierToken:Bool,
+            useSecondFixedCarrierToken:Bool,
             skipConsentScreen:Bool,
             envAppearance: ENVAppearance,
             expInSeconds: Int,
             rCTThreshold: Double
         ) -> Builder {
             caacOptions.eNVCSPOptions = ENVCSPOptions(useFixedCarrierToken: useFixedCarrierToken,
+                                                      useSecondFixedCarrierToken: useSecondFixedCarrierToken,
                                                       skipConsentScreen: skipConsentScreen,
                                                       envAppearance: envAppearance,
                                                       expInSeconds: expInSeconds,

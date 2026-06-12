@@ -55,7 +55,7 @@ public struct CAACView: View {
 
 #Preview("Default") {
     let appearance: ENVAppearance = {
-        var ap = ENVAppearance()
+        let ap = ENVAppearance()
         ap.text.cspName = "CSP Name"
         ap.text.sideSpacing = 10
         return ap
@@ -63,6 +63,7 @@ public struct CAACView: View {
 
     let envCspOptions = ENVCSPOptions(
            useFixedCarrierToken: true,
+           useSecondFixedCarrierToken: false,
            skipConsentScreen: false,
            envAppearance: appearance,
            expInSeconds: 100,

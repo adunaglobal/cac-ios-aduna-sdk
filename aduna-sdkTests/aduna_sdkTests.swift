@@ -27,27 +27,29 @@ final class aduna_sdkTests: XCTestCase {
 
     
     func testSdkSetup() throws {
-        let url  = URL(string: "www.adunaglobal.com")!
-                
-        let options = CAACCSPOptions.Builder()
-            .addENVOptions(useFixedCarrierToken: true,
-                           skipConsentScreen: false,
-                           envAppearance: ENVAppearance(),
-                           expInSeconds: 120,
-                           rCTThreshold: 600
-            )
-            .build()
-        
-        let operation = CAACSDK.getOperationFromUrl(invocationUrl: url, cspOptions: options)
-        
-        // View Part
-        let appearance = ENVAppearance()
-        appearance.text.cspName = "Aduna"
-        
-        if let caacOperation = operation {
-            _ = CAACView(caacOperation: caacOperation)
+        Task {
+            let url  = URL(string: "www.adunaglobal.com")!
+            
+            let options = CAACCSPOptions.Builder()
+                .addENVOptions(useFixedCarrierToken: true,
+                               useSecondFixedCarrierToken: false,
+                               skipConsentScreen: false,
+                               envAppearance: ENVAppearance(),
+                               expInSeconds: 120,
+                               rCTThreshold: 600
+                )
+                .build()
+            
+            let operation = await CAACSDK.getOperationFromUrl(invocationUrl: url, cspOptions: options)
+            
+            // View Part
+            let appearance = ENVAppearance()
+            appearance.text.cspName = "Aduna"
+            
+            if let caacOperation = operation {
+                _ = await CAACView(caacOperation: caacOperation)
+            }
         }
-        
     }
     
     

@@ -46,27 +46,30 @@ final class DocumentationSampleTest: XCTestCase {
         }
         
         func handleInvocationUrl(invocationUrl: URL?) {
-            let cspOptions = CAACCSPOptions.Builder()
-                .addENVOptions(useFixedCarrierToken: false,
-                               skipConsentScreen: false,
-                               envAppearance: ENVAppearance(),
-                               expInSeconds: 120,
-                               rCTThreshold: 600
-                )
-                .addAnalyticsDelegate(caacAnalyticsDelegate: AnalyticsDelegate())
-                .build()
-            
-            if let invocationUrl = invocationUrl,
-               let operation =  CAACSDK.getOperationFromUrl(invocationUrl: invocationUrl,
-                                                            cspOptions: cspOptions)
-            {
-                caacOperation = operation
+            Task {
+                let cspOptions = CAACCSPOptions.Builder()
+                    .addENVOptions(useFixedCarrierToken: false,
+                                   useSecondFixedCarrierToken: false,
+                                   skipConsentScreen: false,
+                                   envAppearance: ENVAppearance(),
+                                   expInSeconds: 120,
+                                   rCTThreshold: 600
+                    )
+                    .addAnalyticsDelegate(caacAnalyticsDelegate: AnalyticsDelegate())
+                    .build()
+                
+                if let invocationUrl = invocationUrl,
+                   let operation =  await CAACSDK.getOperationFromUrl(invocationUrl: invocationUrl,
+                                                                cspOptions: cspOptions)
+                {
+                    caacOperation = operation
+                }
             }
         }
     }
     
     func testExample() throws {
-        var view = SampleView()
+        _ = SampleView()
             
     }
     

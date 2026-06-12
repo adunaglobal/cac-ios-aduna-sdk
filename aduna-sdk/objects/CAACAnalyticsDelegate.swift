@@ -52,14 +52,6 @@ public enum CAACAnalyticsEvent: String {
 public protocol CAACAnalyticsDelegate {
     
     func eventReport(event: CAACAnalyticsEvent, properties: [String: Any]?)
-    
-    
 
 }
 
-struct ConsentReceivedAnalyticsEventData{
-    
-    let scope: String
-    let purpose: String
-    let checked: Bool
-}
