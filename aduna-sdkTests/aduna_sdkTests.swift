@@ -25,7 +25,7 @@ final class aduna_sdkTests: XCTestCase {
         }
     }
 
-    
+    @available(iOS 18.0, *)
     func testSdkSetup() throws {
         Task {
             let url  = URL(string: "www.adunaglobal.com")!

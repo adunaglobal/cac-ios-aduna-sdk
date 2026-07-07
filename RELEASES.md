@@ -1,6 +1,9 @@
 # Aduna-sdk
 
 ## Release Notes
+### 0.10.0
+#### Updates
+- Weak Linking is supported
 
 ### 0.9.0
 #### Updates

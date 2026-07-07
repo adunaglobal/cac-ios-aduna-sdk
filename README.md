@@ -126,13 +126,18 @@ The `CAACSDK` provides a static async function `getOperationFromUrl(invocationUr
 } 
 ``` 
 
-### Presenting the Operation UI 
+### Presenting the Operation UI (iOS 18+)
 If a `CAACOperation` exists, the `CAACView(caacOperation: operation)` can be presented to take over the flow of the operation. 
 ```swift 
 ... 
 (view body) 
 if let operation = self.caacOperation { 
-  CAACView(caacOperation: operation, appearance: appearance) 
+  if #available(iOS 18.0, *) {
+    CAACView(caacOperation: operation, appearance: appearance) 
+  }
+  else {
+    FallbackView() 
+  }
 } 
 ... 
 ``` 
@@ -219,11 +224,13 @@ This section lists common issues encountered when integrating the SDK and how to
 The app opens, but the SDK UI is not presented. 
 
 **Possible causes** 
+- Device has iOS version installed lower than 18.6.
 - `onContinueUserActivity` is not implemented or not reached 
 - The returned `CAACOperation` is not retained 
 - The `CAACView` is not rendered in the view hierarchy 
 
 **Resolution** 
+- Update device to minimum 18.6 iOS version
 - Confirm that `NSUserActivityTypeBrowsingWeb` is handled 
 - Store the returned operation in a `@State` or equivalent property 
 - Ensure `CAACView` is conditionally presented when the operation is non-nil 
@@ -292,12 +299,14 @@ No logs appear in the console.
 The SDK is not invoked when launched via an App Clip URL. 
 
 **Possible causes** 
+- Device has iOS version installed lower than 18.6.
 - Associated Domains are not configured correctly in the Carrier app or App Clip target
 - The AASA file does not include the required paths for invoking the Carrier app or App Clip
 - The carrier handover HTML page is missing required metadata or invocation parameters
 - The invocation URL is not opened in the Safari browser
 
 **Resolution** 
+- Update device to minimum 18.6 iOS version
 - Verify the `applinks:` configuration for both the Carrier app and App Clip targets
 - Ensure the AASA file includes the correct paths and bundle identifiers
 - Validate the carrier handover HTML page metadata and invocation URL format

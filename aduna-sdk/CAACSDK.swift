@@ -89,6 +89,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
     }
 
     
+    @available(iOS 18.0, *)
     func performNumberVerification() {
         
         guard let payload = uLinkModel?.payload,
@@ -367,6 +368,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
         
     }
     
+    @available(iOS 18.0, *)
     func getCarrierToken (completion: (([String]?) -> Void)?) {
         stateQ.async {
             if self.useFixedCarrierToken {

@@ -9,6 +9,7 @@
 import SwiftUI
 import OSLog
 
+@available(iOS 18.0, *)
 struct ENVContentView: View {
     
     @EnvironmentObject private var eNVsdk: CAACSDK
@@ -114,6 +115,7 @@ struct ENVContentView: View {
     
 }
 
+@available(iOS 18.0, *)
 #Preview("Loading") {
     let appearance =  ENVAppearance()
     return ENVContentView()
@@ -121,6 +123,7 @@ struct ENVContentView: View {
         .environmentObject(MockSDK(wantedState: MockSDK.MockState.loading) as CAACSDK)
 }
 
+@available(iOS 18.0, *)
 #Preview("Loading Cloud") {
     let appearance =  ENVAppearance()
     appearance.text.cspName = "Cloud™"
@@ -139,6 +142,7 @@ struct ENVContentView: View {
         .environmentObject(MockSDK(wantedState: MockSDK.MockState.loading) as CAACSDK)
 }
 
+@available(iOS 18.0, *)
 #Preview("Loading Cloud Leading") {
     let appearance =  ENVAppearance()
     appearance.text.cspName = "Cloud™"

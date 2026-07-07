@@ -23,6 +23,7 @@ import SystemConfiguration
  ENVConsentView().environmentObject(eNVSdk).environmentObject(appearance)
  ```
  */
+@available(iOS 18.0, *)
 struct ENVConsentView: View {
     
     enum AlertType: Identifiable {
@@ -235,6 +236,7 @@ struct ENVConsentView: View {
     
 }
 
+@available(iOS 18.0, *)
 #Preview("Default") {
     let appearance: ENVAppearance = {
         let a = ENVAppearance()
@@ -247,6 +249,7 @@ struct ENVConsentView: View {
         .environmentObject(appearance)
 }
 
+@available(iOS 18.0, *)
 #Preview("Default left") {
     let appearance: ENVAppearance = {
         let a = ENVAppearance()
@@ -260,6 +263,7 @@ struct ENVConsentView: View {
         .environmentObject(appearance)
 }
 
+@available(iOS 18.0, *)
 #Preview("Aduna") {
     struct AdPrimaryButtonStyle: ButtonStyle{
         public func makeBody(configuration: Configuration) -> some View {
@@ -330,7 +334,7 @@ struct AdSecondaryButtonStyle: ButtonStyle {
 }
 
 
-
+@available(iOS 18.0, *)
 #Preview("Aduna left") {
     let appearance: ENVAppearance = {
         let a = ENVAppearance()
@@ -379,6 +383,7 @@ fileprivate struct DarkSampleSecondaryButtonStyle: ButtonStyle{
     }
 }
 
+@available(iOS 18.0, *)
 #Preview("Cloud") {
     let appearance =  ENVAppearance()
     appearance.text.cspName = "Cloud™"
@@ -400,7 +405,7 @@ fileprivate struct DarkSampleSecondaryButtonStyle: ButtonStyle{
     return consentView
 }
 
-
+@available(iOS 18.0, *)
 #Preview("Cloud left") {
     let appearance =  ENVAppearance()
     appearance.text.alignment = .leading

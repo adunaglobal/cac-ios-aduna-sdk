@@ -24,6 +24,7 @@ final class DocumentationSampleTest: XCTestCase {
         }
     }
     
+    @available(iOS 18.0, *)
     struct SampleView: View {
         
         @State
@@ -68,6 +69,7 @@ final class DocumentationSampleTest: XCTestCase {
         }
     }
     
+    @available(iOS 18.0, *)
     func testExample() throws {
         _ = SampleView()
             

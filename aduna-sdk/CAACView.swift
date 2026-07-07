@@ -18,6 +18,7 @@ var previewVcpState = "a6391c96-16b5-4ee7-b2bf-bbac7fdec474"
  User is automatically guided to one of these operations depending on the ``CAACOperation`` returned
  from ``CAACSDK/getOperationFromUrl(invocationUrl:cspOptions:)``
  */
+@available(iOS 18.0, *)
 public struct CAACView: View {
     var caacOperation : CAACOperation
     
@@ -53,6 +54,7 @@ public struct CAACView: View {
     }
 }
 
+@available(iOS 18.0, *)
 #Preview("Default") {
     let appearance: ENVAppearance = {
         let ap = ENVAppearance()
