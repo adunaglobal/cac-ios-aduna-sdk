@@ -1,6 +1,14 @@
 # Aduna-sdk
 
 ## Release Notes
+### 0.10.2
+#### Other
+- Log level changed to none
+
+### 0.10.1
+#### Bug Fixes
+- Improved handling of carrier token in App clip   
+
 ### 0.10.0
 #### Updates
 - Weak Linking is supported

@@ -392,15 +392,16 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                 var activeSubscribers: [CTSubscriber] = []
                 let subscribers = Array(CTSubscriberInfo.subscribers())
                 for subscriber in subscribers {
-                    if subscriber.isSIMInserted {
-                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["isSIMInserted for subscriber \(subscriber.identifier)":true])
-                        SDKLogger.debug("SIM \(subscriber.identifier) matches the app’s carrier descriptors.")
-                        activeSubscribers.append(subscriber)
-                    }
-                    else {
-                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["isSIMInserted for subscriber \(subscriber.identifier)":false])
-                        SDKLogger.debug("SIM \(subscriber.identifier) does not match the app’s carrier descriptors.")
-                    }
+                    activeSubscribers.append(subscriber)
+//                    if subscriber.isSIMInserted {
+//                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["isSIMInserted for subscriber \(subscriber.identifier)":true])
+//                        SDKLogger.debug("SIM \(subscriber.identifier) matches the app’s carrier descriptors.")
+//                        activeSubscribers.append(subscriber)
+//                    }
+//                    else {
+//                        self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["isSIMInserted for subscriber \(subscriber.identifier)":false])
+//                        SDKLogger.debug("SIM \(subscriber.identifier) does not match the app’s carrier descriptors.")
+//                    }
                 }
                 self.activeSubscribers = activeSubscribers
                 
@@ -411,7 +412,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                     return
                 }
                 
-                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Active SIMs found": activeSubscribers.count])
+//                self.caacAnalyticsDelegate?.eventReport(event: .envCarrierToken, properties: ["Active SIMs found": activeSubscribers.count])
                 
                 let now = Date().timeIntervalSince1970
                 SDKLogger.debug("Refresh Carrier Token Timer \(self.RCTTimer)")
