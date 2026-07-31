@@ -553,13 +553,15 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
                            "dpv:FraudPreventionAndDetection number-verification:verify"]
         
         guard let appInfoJwt = url.valueOf("app_info_jwt"),
-              let scope = url.valueOf("scope")
+              let urlScope = url.valueOf("scope")
         else {
             let errorDescription = FlowErrorDescription.MISSING_MANDATORY_PARAMETER.rawValue
             caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": "invocation_url_error", "error_description": errorDescription])
             SDKLogger.error("One of the mandatory parameters of invocation URL is missing")
             return nil
         }
+        
+        let scope = urlScope.replacingOccurrences(of: "+", with: " ")
         
         if !validScopes.contains(scope) {
             SDKLogger.error("Invocation URL scope is not the expected")
@@ -857,7 +859,7 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             let scopeOfJwt = payloadAppInfo["scope"] as? String
             SDKLogger.debug("Scope of JWT app info is \(String(describing: scopeOfJwt))")
             if (scopeOfJwt != nil && scopeOfJwt != scope) {
-                SDKLogger.error("Scope of the invocation URL and scope of the app_info_jwt payload do not match")
+                SDKLogger.error("Scope of the invocation URL: \(scope) and scope of the app_info_jwt payload \(String(describing: scopeOfJwt)) do not match")
                 let errorCode = FlowErrorCode.jwt_analysis.rawValue
                 let errorDescription = FlowErrorDescription.SCOPE_MISMATCH.rawValue
                 caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
