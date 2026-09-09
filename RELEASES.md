@@ -1,6 +1,10 @@
 # Aduna-sdk
 
 ## Release Notes
+### 0.10.4
+#### Other
+- README file updated
+
 ### 0.10.3
 #### Other
 - Improvements in the handling of scope

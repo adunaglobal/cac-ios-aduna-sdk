@@ -6,16 +6,16 @@ Aduna's SDK fulfills the end-to-end flow of SIM-based Authentication. For this d
 ## Contents 
 1. [Features](#features) 
 2. [Development Requirements](#development-requirements) 
-3. [Compatibility](#compatibility) 
-4. [Installation](#installation) 
-5. [Quick Start](#quick-start) 
-6. [Developer Guide](#developer-guide) 
-7. [Building from Source](#building-from-source) 
-8. [Troubleshooting](#troubleshooting) 
-9. [Privacy & Data Handling](#privacy--data-handling)
+3. [Setup Requirements](#setup-requirements) 
+4. [Compatibility](#compatibility) 
+5. [Installation](#installation) 
+6. [Quick Start](#quick-start) 
+7. [Documentation](#documentation) 
+8. [Building from Source](#building-from-source) 
+9. [Troubleshooting](#troubleshooting) 
 10. [Public Notice](#public-notice)
-11. [Support & Contact](#support--contact) 
-12. [Versioning](#versioning) 
+11. [Privacy & Data Handling](#privacy--data-handling)
+12. [Support & Contact](#support--contact) 
 13. [License](#license) 
 
 
@@ -168,7 +168,7 @@ enum SDKLogger {
 Note: Change of the default log level .none requires rebuild of the SDK
 
 ## Documentation
-For detailed usage instructions and integration scenarios, refer to: 
+For detailed usage instructions and integration scenarios, refer to [Aduna's Documentation Portal](https://docs.adunaglobal.com/guides/aduna-software-development-kits-sdk/aduna-camara-number-verification-v2-sdk-for-ios), which includes the following resources:
 - **Developer Guide for Aduna SDK iOS**
 - **Protocol Specification for NV 2 in iOS**
 - **NV 2 Implementation Framework for iOS SDK**
