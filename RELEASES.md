@@ -1,6 +1,10 @@
 # Aduna-sdk
 
 ## Release Notes
+### 0.10.5
+#### Other
+- Enhancement on Number Verification scope handling
+
 ### 0.10.4
 #### Other
 - README file updated

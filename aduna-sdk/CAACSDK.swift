@@ -544,13 +544,13 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
             return nil
         }
         
-        let validScopes = ["dpv:FraudPreventionAndDetection#number-verification-verify-read",
-                           "dpv:FraudPreventionAndDetection#number-verification:verify",
-                           "dpv:FraudPreventionAndDetection#number-verification:device-phone-number:read",
-                           "openid dpv:FraudPreventionAndDetection number-verification:device-phone-number:read",
-                           "openid dpv:FraudPreventionAndDetection number-verification:verify",
-                           "dpv:FraudPreventionAndDetection number-verification:device-phone-number:read",
-                           "dpv:FraudPreventionAndDetection number-verification:verify"]
+//        let validScopes = ["dpv:FraudPreventionAndDetection#number-verification-verify-read",
+//                           "dpv:FraudPreventionAndDetection#number-verification:verify",
+//                           "dpv:FraudPreventionAndDetection#number-verification:device-phone-number:read",
+//                           "openid dpv:FraudPreventionAndDetection number-verification:device-phone-number:read",
+//                           "openid dpv:FraudPreventionAndDetection number-verification:verify",
+//                           "dpv:FraudPreventionAndDetection number-verification:device-phone-number:read",
+//                           "dpv:FraudPreventionAndDetection number-verification:verify"]
         
         guard let appInfoJwt = url.valueOf("app_info_jwt"),
               let urlScope = url.valueOf("scope")
@@ -563,13 +563,13 @@ public class CAACSDK: NSObject, CTSubscriberDelegate {
         
         let scope = urlScope.replacingOccurrences(of: "+", with: " ")
         
-        if !validScopes.contains(scope) {
-            SDKLogger.error("Invocation URL scope is not the expected")
-            let errorCode = FlowErrorCode.generic_failure.rawValue
-            let errorDescription = FlowErrorDescription.SCOPE_MISMATCH.rawValue
-            caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
-            return nil
-        }
+//        if !validScopes.contains(scope) {
+//            SDKLogger.error("Invocation URL scope is not the expected")
+//            let errorCode = FlowErrorCode.generic_failure.rawValue
+//            let errorDescription = FlowErrorDescription.SCOPE_MISMATCH.rawValue
+//            caacAnalyticsDelegate?.eventReport(event: .envInvocationUrlError, properties: ["error": errorCode, "error_description": errorDescription])
+//            return nil
+//        }
         
         if appInfoJwt.isEmpty {
             SDKLogger.error("appInfoJwt is empty")
